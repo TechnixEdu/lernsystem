@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070b12">
+<title>Tresor-Challenge: Reihenschaltung</title>
+<style>
+:root{
+  --bg:#070b12; --panel:#0e1623; --panel2:#142034; --line:#1f3050;
+  --text:#dbe7f5; --dim:#7f93ad; --cyan:#19e3ff; --cyan-d:#0a8aa0; --ok:#2dff9a; --warn:#ffb020; --bad:#ff4d6a;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{min-height:100vh;background:
+  radial-gradient(900px 420px at 50% -120px,rgba(25,227,255,.13),transparent 70%),
+  linear-gradient(rgba(25,227,255,.035) 1px,transparent 1px) 0 0/100% 28px,
+  var(--bg);padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
+.wrap{max-width:440px;margin:0 auto}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+h1{font-size:15px;letter-spacing:.22em;text-transform:uppercase;margin:0;font-weight:600;color:var(--cyan)}
+.sub{font-size:12px;color:var(--dim);letter-spacing:.04em;margin-top:3px}
+.status{display:flex;align-items:center;gap:8px;font:600 11px ui-monospace,Consolas,monospace;letter-spacing:.14em;color:var(--warn)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--warn);box-shadow:0 0 10px var(--warn)}
+.open .status{color:var(--ok)} .open .dot{background:var(--ok);box-shadow:0 0 12px var(--ok)}
+
+.clues{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:6px 14px;margin-bottom:16px}
+.clue{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.35}
+.clue:last-child{border-bottom:0}
+.clue b{flex:0 0 auto;font:700 12px ui-monospace,Consolas,monospace;color:var(--cyan);border:1px solid var(--cyan-d);border-radius:6px;padding:3px 7px;height:fit-content;letter-spacing:.06em}
+.clue span.t{color:var(--text)} .clue small{display:block;color:var(--dim);margin-top:2px;font-size:12px}
+
+.stage{perspective:1100px;margin-bottom:14px}
+.safe{position:relative;border-radius:18px;background:linear-gradient(160deg,#101a2b,#0a111d);border:1px solid var(--line);
+  box-shadow:0 0 0 1px rgba(25,227,255,.06),0 18px 50px rgba(0,0,0,.55);aspect-ratio:1/1.02;overflow:visible}
+.inside{position:absolute;inset:10px;border-radius:12px;background:radial-gradient(circle at 50% 40%,rgba(45,255,154,.18),rgba(10,17,29,1) 70%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px;gap:10px}
+.inside h2{margin:0;font-size:18px;letter-spacing:.12em;text-transform:uppercase;color:var(--ok)}
+.inside p{margin:0;font-size:14px;line-height:1.45;color:var(--text)}
+.badge{font:700 12px ui-monospace,Consolas,monospace;letter-spacing:.14em;color:#04120b;background:var(--ok);padding:6px 12px;border-radius:999px;box-shadow:0 0 18px rgba(45,255,154,.55)}
+.door{position:absolute;inset:10px;border-radius:12px;background:linear-gradient(160deg,#18263d,#0e1828);border:1px solid #27406b;
+  transform-origin:left center;transition:transform 1.5s cubic-bezier(.6,.05,.2,1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  box-shadow:inset 0 0 0 1px rgba(25,227,255,.12),inset 0 0 40px rgba(0,0,0,.35);backface-visibility:hidden}
+.open .door{transform:rotateY(-112deg);pointer-events:none}
+.bolts{position:absolute;right:-7px;top:18%;bottom:18%;width:14px;display:flex;flex-direction:column;justify-content:space-between}
+.bolts i{display:block;height:18px;border-radius:4px;background:linear-gradient(90deg,#3a5a8a,#8fb4e8);transition:transform .6s .1s ease}
+.open .bolts i{transform:translateX(-22px)}
+.wheels{display:flex;gap:10px}
+.wcol{display:flex;flex-direction:column;align-items:center;gap:6px}
+.arrow{width:54px;height:30px;border:1px solid var(--line);background:var(--panel2);color:var(--cyan);border-radius:8px;font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none}
+.arrow:active{background:#1b2e4d}
+.win{position:relative;width:54px;height:150px;border-radius:10px;border:1px solid var(--cyan-d);background:#060b14;box-shadow:0 0 14px rgba(25,227,255,.18),inset 0 0 18px rgba(0,0,0,.7);overflow:hidden}
+.win::before,.win::after{content:"";position:absolute;left:0;right:0;height:50px;z-index:2;pointer-events:none}
+.win::before{top:0;background:linear-gradient(#060b14,rgba(6,11,20,.2))}
+.win::after{bottom:0;background:linear-gradient(rgba(6,11,20,.2),#060b14)}
+.win .mid{position:absolute;left:0;right:0;top:50px;height:50px;border-top:1px solid rgba(25,227,255,.55);border-bottom:1px solid rgba(25,227,255,.55);z-index:1;pointer-events:none}
+.scroll{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.scroll::-webkit-scrollbar{display:none}
+.scroll div{height:50px;scroll-snap-align:center;display:flex;align-items:center;justify-content:center;font:700 30px ui-monospace,Consolas,monospace;color:var(--cyan);text-shadow:0 0 12px rgba(25,227,255,.7)}
+.scroll .sp{height:50px;scroll-snap-align:none}
+.led{width:10px;height:10px;border-radius:50%;background:#1a2638;border:1px solid #2c4366;transition:all .3s}
+.led.g{background:var(--ok);box-shadow:0 0 12px var(--ok);border-color:var(--ok)}
+.led.a{background:var(--warn);box-shadow:0 0 10px var(--warn);border-color:var(--warn)}
+.btn{appearance:none;border:1px solid var(--cyan);background:rgba(25,227,255,.08);color:var(--cyan);font:700 13px ui-monospace,Consolas,monospace;letter-spacing:.2em;padding:12px 26px;border-radius:10px;cursor:pointer;box-shadow:0 0 18px rgba(25,227,255,.25)}
+.btn:active{background:rgba(25,227,255,.22)}
+.msg{min-height:68px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.45;color:var(--text)}
+.msg.warn{border-color:#5a4210} .msg.ok{border-color:#145a3a}
+.msg small{color:var(--dim)}
+.shake{animation:shake .45s}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.again{margin-top:12px;text-align:center}
+.link{color:var(--dim);font-size:12px;text-decoration:underline;cursor:pointer;background:none;border:0}
+.hidden{display:none}
+.foot{margin-top:14px;font-size:11.5px;color:var(--dim);text-align:center;line-height:1.5}
+@media (prefers-reduced-motion:reduce){.door,.bolts i,.led{transition:none}.shake{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header>
+    <div><h1 id="h1"></h1><div class="sub" id="sub"></div></div>
+    <div class="status"><span class="dot"></span><span id="st">VERRIEGELT</span></div>
+  </header>
+
+  <section class="clues" id="clues" aria-label="Hinweise zur Zahlenkombination"></section>
+
+  <div class="stage">
+    <div class="safe" id="safe">
+      <div class="inside">
+        <span class="badge">ZUGANG GEWÄHRT</span>
+        <h2 id="in_t"></h2>
+        <p id="in_p"></p>
+        <p><small id="in_k"></small></p>
+      </div>
+      <div class="door" id="door">
+        <div class="wheels" id="wheels"></div>
+        <button class="btn" id="check" type="button">PRÜFEN</button>
+        <div class="bolts"><i></i><i></i><i></i></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="msg" id="msg" role="status" aria-live="polite">Stelle die Räder mit Wischen oder den Pfeilen ein und tippe auf <b>Prüfen</b>. Die Kontrollleuchten zeigen dir, welche Räder stimmen.</div>
+  <div class="again"><button class="link" id="reset" type="button">Räder zurücksetzen</button></div>
+  <p class="foot">Funktioniert ohne Internet, sobald die Seite einmal geladen wurde.<br>Die Challenge ist freiwillig und hat keinen Einfluss auf die Bewertung.</p>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  // Zahlenkombination (leicht verschleiert, damit sie nicht im Klartext im Quelltext steht)
+  var D={"titel": "Schaltschrank-Tresor", "untertitel": "Challenge · Reihenschaltung (freiwillig)", "hinweise": ["Teilspannung <i>U</i><sub>2</sub> aus Aufgabe 2, gerundet auf ganze Volt.", "Vorwiderstand der LED aus Aufgabe 4, angegeben in Hundert Ohm.", "Spannung <i>U</i><sub>1</sub> des Spannungsteilers aus Aufgabe 5, in Volt.", "Stromstärke aus Aufgabe 2 in mA: die erste Ziffer."], "hint": ["Aufgabe 2 (Teilspannung U2)", "Aufgabe 4 (Vorwiderstand)", "Aufgabe 5 (Spannungsteiler)", "Aufgabe 2 (Strom in mA)"], "code": [7, 5, 6, 4], "schluessel": [50, 51, 49, 60], "innen_titel": "Stromkreis geschlossen", "innen_text": "Gut gerechnet. Genau so prüfen Elektrofachkräfte ihre Werte, bevor ein Schaltschrank unter Spannung gesetzt wird: Strom überall gleich, Teilspannungen addieren sich zur Gesamtspannung.", "innen_klein": "Alle vier Räder stammen aus deinen eigenen Ergebnissen."};
+  var K=D.schluessel, HINT=D.hint;
+  document.getElementById('h1').textContent=D.titel; document.getElementById('sub').textContent=D.untertitel; document.title=D.titel;
+  document.getElementById('in_t').textContent=D.innen_titel; document.getElementById('in_p').innerHTML=D.innen_text; document.getElementById('in_k').textContent=D.innen_klein;
+  D.hinweise.forEach(function(h,i){var r=document.createElement('div'); r.className='clue'; r.innerHTML='<b>RAD '+(i+1)+'</b><span class="t">'+h+'</span>'; document.getElementById('clues').appendChild(r)});
+  var H=50, wheelsEl=document.getElementById('wheels'), cols=[];
+  var app=document.getElementById('app'), msg=document.getElementById('msg'), st=document.getElementById('st'), door=document.getElementById('door');
+  var done=false;
+
+  function val(sc){return Math.max(0,Math.min(9,Math.round(sc.scrollTop/H)))}
+  function setVal(sc,v,smooth){sc.scrollTo({top:v*H,behavior:smooth?'smooth':'auto'})}
+
+  for(var i=0;i<4;i++){
+    var c=document.createElement('div'); c.className='wcol';
+    var up=document.createElement('div'); up.className='arrow'; up.textContent='▲'; up.setAttribute('role','button'); up.setAttribute('aria-label','Rad '+(i+1)+' erhöhen');
+    var win=document.createElement('div'); win.className='win';
+    var mid=document.createElement('div'); mid.className='mid';
+    var sc=document.createElement('div'); sc.className='scroll';
+    var s1=document.createElement('div'); s1.className='sp'; sc.appendChild(s1);
+    for(var d=0;d<10;d++){var e=document.createElement('div'); e.textContent=d; sc.appendChild(e);}
+    var s2=document.createElement('div'); s2.className='sp'; sc.appendChild(s2);
+    win.appendChild(mid); win.appendChild(sc);
+    var dn=document.createElement('div'); dn.className='arrow'; dn.textContent='▼'; dn.setAttribute('role','button'); dn.setAttribute('aria-label','Rad '+(i+1)+' verringern');
+    var led=document.createElement('div'); led.className='led';
+    c.appendChild(up); c.appendChild(win); c.appendChild(dn); c.appendChild(led);
+    wheelsEl.appendChild(c);
+    cols.push({sc:sc,led:led});
+    (function(sc,led){
+      up.addEventListener('click',function(){setVal(sc,Math.min(9,val(sc)+1),true);led.className='led'});
+      dn.addEventListener('click',function(){setVal(sc,Math.max(0,val(sc)-1),true);led.className='led'});
+      sc.addEventListener('scroll',function(){led.className='led'},{passive:true});
+    })(sc,led);
+  }
+
+  function check(){
+    if(done) return;
+    var ok=0, wrong=[];
+    cols.forEach(function(c,i){
+      var v=val(c.sc), right=(K[i]^(0x35+i))===v;
+      c.led.className='led '+(right?'g':'a');
+      if(right) ok++; else wrong.push(i);
+    });
+    if(ok===4){ done=true; app.classList.add('open'); st.textContent='GEÖFFNET'; msg.className='msg ok';
+      msg.innerHTML='<b>Tresor geöffnet.</b> Alle vier Ziffern stimmen.'; if(navigator.vibrate){try{navigator.vibrate([60,40,120])}catch(e){}}
+    } else {
+      msg.className='msg warn';
+      var h=wrong.map(function(i){return 'Rad '+(i+1)+' → '+HINT[i]}).join('<br>');
+      msg.innerHTML='<b>'+ok+' von 4 Rädern stimmen.</b> Überlege noch einmal und rechne nach:<br><small>'+h+'</small>';
+      var safe=document.getElementById('safe'); safe.classList.remove('shake'); void safe.offsetWidth; safe.classList.add('shake');
+    }
+  }
+  document.getElementById('check').addEventListener('click',check);
+  document.getElementById('reset').addEventListener('click',function(){
+    done=false; app.classList.remove('open'); st.textContent='VERRIEGELT'; msg.className='msg'; msg.innerHTML='Räder zurückgesetzt. Neuer Versuch!';
+    cols.forEach(function(c){c.led.className='led'; setVal(c.sc,0,false)});
+  });
+  window.__tresor={setAll:function(a){cols.forEach(function(c,i){setVal(c.sc,a[i],false)})},check:check};   // nur zum Testen
+
+  // Offline: Service Worker (nur ueber http/https, nicht beim direkten Oeffnen der Datei)
+  if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
+    try{navigator.serviceWorker.register('sw.js')}catch(e){}
+  }
+})();
+</script>
+</body>
+</html>

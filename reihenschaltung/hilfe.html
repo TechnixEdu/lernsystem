@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070b12">
+<title>Hilfe in drei Stufen</title>
+<style>
+:root{--bg:#070b12;--panel:#0e1623;--panel2:#142034;--line:#1f3050;--text:#dbe7f5;--dim:#7f93ad;--cyan:#19e3ff;--cyan-d:#0a8aa0;--ok:#2dff9a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{min-height:100vh;background:radial-gradient(900px 420px at 50% -120px,rgba(25,227,255,.13),transparent 70%),linear-gradient(rgba(25,227,255,.035) 1px,transparent 1px) 0 0/100% 28px,var(--bg);padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
+.wrap{max-width:440px;margin:0 auto}
+h1{font-size:15px;letter-spacing:.22em;text-transform:uppercase;margin:0;font-weight:600;color:var(--cyan)}
+.sub{font-size:12px;color:var(--dim);letter-spacing:.04em;margin:3px 0 16px}
+.task{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+.task h2{margin:0 0 4px;font-size:16px}
+.task p{margin:0;color:var(--dim);font-size:13px;line-height:1.4}
+.steps{display:flex;flex-direction:column;gap:10px}
+.step{border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden}
+.step.lock{opacity:.5}
+.head{display:flex;align-items:center;gap:12px;width:100%;padding:14px;background:none;border:0;color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.head[disabled]{cursor:default}
+.num{flex:0 0 auto;font:700 12px ui-monospace,Consolas,monospace;color:var(--cyan);border:1px solid var(--cyan-d);border-radius:6px;padding:3px 8px;letter-spacing:.06em}
+.head .t{flex:1;font-size:14px}
+.head .s{font:600 11px ui-monospace,Consolas,monospace;color:var(--dim);letter-spacing:.1em}
+.body{display:none;padding:0 14px 14px 14px;font-size:15px;line-height:1.5}
+.step.open{border-color:var(--cyan-d);box-shadow:0 0 18px rgba(25,227,255,.14)}
+.step.open .body{display:block;animation:in .35s ease}
+.step.open .s{color:var(--ok)}
+@keyframes in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.note{margin-top:14px;font-size:12px;color:var(--dim);line-height:1.5;text-align:center}
+.pick{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.pick a{display:block;text-align:center;border:1px solid var(--cyan-d);border-radius:10px;padding:14px 8px;color:var(--cyan);text-decoration:none;font:700 13px ui-monospace,Consolas,monospace;letter-spacing:.08em;background:rgba(25,227,255,.06)}
+.hidden{display:none}
+@media (prefers-reduced-motion:reduce){.step.open .body{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Hilfe</h1>
+  <div class="sub">in drei Stufen · Reihenschaltung</div>
+  <div id="app"></div>
+  <p class="note">Versuche es zuerst allein. Öffne eine Stufe erst, wenn du nicht weiterkommst.<br>Funktioniert ohne Internet, sobald die Seite einmal geladen wurde.</p>
+</div>
+<script>
+(function(){
+  'use strict';
+  var D={"thema": "Reihenschaltung", "aufgaben": {"2": {"titel": "Drei Widerstände in Reihe", "stufen": ["Der Strom hat nur einen Weg. Was gilt dann für die Stromstärke an allen drei Widerständen?", "Tabellenbuch: Reihenschaltung von Widerständen. Reihenfolge: Gesamtwiderstand, dann Strom, dann Teilspannungen.", "Strom = Gesamtspannung durch Gesamtwiderstand. Teilspannung = Strom mal der jeweilige Widerstand."]}, "4": {"titel": "Vorwiderstand für eine LED", "stufen": ["Schreibe zuerst auf, was gegeben und was gesucht ist. Die LED nimmt nur 2 V. Wo bleibt der Rest der 12 V?", "Tabellenbuch: Reihenschaltung von Widerständen. Die Teilspannungen ergeben zusammen die Gesamtspannung.", "Spannung am Vorwiderstand = Gesamtspannung minus LED-Spannung. Durch ihn fließen dieselben 20 mA wie durch die LED."]}, "5": {"titel": "Spannungsteiler", "stufen": ["Schreibe zuerst auf, was gegeben und was gesucht ist. Je größer der Widerstand, desto größer sein Anteil an der Spannung.", "Tabellenbuch: Reihenschaltung von Widerständen. Die Teilspannungen verhalten sich wie die Widerstände.", "Erst das Verhältnis bestimmen, dann die Gesamtspannung in so viele gleiche Teile teilen, wie das Verhältnis Teile hat."]}, "9": {"titel": "Fehlersuche in der Steuerung", "stufen": ["Fließt bei einem offenen Schalter Strom? Was zeigt dann ein Voltmeter an den anderen Bauteilen?", "Ohne Strom fällt an den Bauteilen keine Spannung ab. Wo bleibt dann die gesamte Spannung?", "Suche die Messstelle, an der die ganze Spannung anliegt, und begründe, warum dort kein Strom fließen kann."]}, "10": {"titel": "Zusatzaufgabe: Lichterkette", "stufen": ["Schreibe zuerst auf, was gegeben und was gesucht ist. Wie verteilt sich die Spannung auf 20 gleiche Widerstände in Reihe?", "Tabellenbuch: Reihenschaltung von Widerständen. Gleiche Widerstände haben gleiche Teilspannungen.", "Lampenspannung = Gesamtspannung geteilt durch die Anzahl. Dann Widerstand aus Spannung und Strom der einzelnen Lampe."]}}};
+  var DATA=D.aufgaben;
+  document.querySelector('.sub').textContent='in drei Stufen · '+D.thema;
+  var app=document.getElementById('app');
+  var m=/[?&]a=(\d+)/.exec(location.search); var a=m&&DATA[m[1]]?m[1]:null;
+  function el(t,c,x){var e=document.createElement(t); if(c) e.className=c; if(x!==undefined) e.textContent=x; return e}
+  if(!a){
+    app.appendChild(el('div','task')).appendChild(el('p','', 'Wähle die Aufgabe, zu der du Hilfe brauchst.'));
+    var g=el('div','pick');
+    Object.keys(DATA).forEach(function(k){var l=el('a','', 'Aufgabe '+k); l.href='?a='+k; g.appendChild(l)});
+    app.appendChild(g); return;
+  }
+  var d=DATA[a], t=el('div','task');
+  t.appendChild(el('h2','', 'Aufgabe '+a+': '+d.titel));
+  t.appendChild(el('p','', 'Jede Stufe verrät etwas mehr. Die Rechnung machst du selbst.'));
+  app.appendChild(t);
+  var box=el('div','steps'); app.appendChild(box);
+  var titles=['Ein Denkanstoß','Ein Hinweis zum Weg','Der nächste Schritt'], steps=[];
+  d.stufen.forEach(function(txt,i){
+    var s=el('div','step'+(i?' lock':'')), h=el('button','head'); h.type='button'; if(i) h.disabled=true;
+    h.appendChild(el('span','num','HILFE '+(i+1))); h.appendChild(el('span','t',titles[i])); var st=el('span','s', i?'GESPERRT':'ÖFFNEN'); h.appendChild(st);
+    var b=el('div','body',txt); s.appendChild(h); s.appendChild(b); box.appendChild(s); steps.push({s:s,h:h,st:st});
+    h.addEventListener('click',function(){
+      s.classList.add('open'); st.textContent='OFFEN'; h.disabled=true;
+      if(steps[i+1]){steps[i+1].s.classList.remove('lock'); steps[i+1].h.disabled=false; steps[i+1].st.textContent='ÖFFNEN'}
+    });
+  });
+  if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){try{navigator.serviceWorker.register('sw.js')}catch(e){}}
+})();
+</script>
+</body>
+</html>

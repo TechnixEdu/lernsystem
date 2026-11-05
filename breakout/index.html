@@ -119,7 +119,7 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:300/420;border-radius:3
     steine=[]; var cols=7, bw=(W-20-6*3)/cols, bh=16, reihen=['x1','dc','dc','al'];
     reihen.forEach(function(t,r){ for(var c=0;c<cols;c++) steine.push({x:10+c*(bw+3),y:46+r*(bh+3),w:bw,h:bh,t:t,hp:TYPEN[t].hp}) });
   }
-  function basis(){ return Math.min(6.2, 3.5+(level-1)*0.4) }
+  function basis(){ return Math.min(10.5, 3.5+(level-1)*0.9) }
   function auflegen(){ px=W/2; zustand='bereit'; bx=px; by=PY-PH/2-BR-2; vx=vy=0; speed=basis(); }
   function neuesSpiel(){ punkte=0; level=1; leben=3; abgebaut=0; defl=0; dv=0; feld(); auflegen(); anzeige() }
   function anzeige(){ $('pt').textContent=punkte; $('lv').textContent=level; $('lb').textContent=leben }
@@ -131,7 +131,7 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:300/420;border-radius:3
     dv+=(-0.22*defl-0.10*dv)*dt; defl+=dv*dt;                       // Blech federt zurueck
     if(zustand==='bereit'){ bx=px; by=PY-PH/2-BR-2; return }
     if(zustand!=='laeuft') return;
-    var n=2, s=dt/n;
+    var n=Math.max(2,Math.ceil(speed*dt/3)), s=dt/n;
     for(var i=0;i<n;i++){
       bx+=vx*s; by+=vy*s;
       if(bx<BR){bx=BR; vx=Math.abs(vx)} if(bx>W-BR){bx=W-BR; vx=-Math.abs(vx)} if(by<BR){by=BR; vy=Math.abs(vy)}
@@ -144,7 +144,7 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:300/420;border-radius:3
         var b=steine[k], nx=Math.max(b.x,Math.min(bx,b.x+b.w)), ny=Math.max(b.y,Math.min(by,b.y+b.h)), dx=bx-nx, dy=by-ny;
         if(dx*dx+dy*dy<=BR*BR){
           if(Math.abs(dx)>Math.abs(dy)){ vx=dx>0?Math.abs(vx):-Math.abs(vx); bx=nx+(dx>0?BR:-BR) } else { vy=dy>=0?Math.abs(vy):-Math.abs(vy); by=ny+(dy>=0?BR:-BR) }
-          b.hp--; if(b.hp<=0){ punkte+=TYPEN[b.t].pt; abgebaut++; steine.splice(k,1); speed=Math.min(7,speed+0.04); var m=Math.hypot(vx,vy); vx*=speed/m; vy*=speed/m; anzeige() }
+          b.hp--; if(b.hp<=0){ punkte+=TYPEN[b.t].pt; abgebaut++; steine.splice(k,1); speed=Math.min(11.5,speed+0.05); var m=Math.hypot(vx,vy); vx*=speed/m; vy*=speed/m; anzeige() }
           break;
         }
       }

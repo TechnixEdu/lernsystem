@@ -179,12 +179,12 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:300/420;border-radius:3
       cx.fillStyle=T.t; cx.font='bold 8px ui-monospace,Consolas,monospace'; cx.textAlign='center'; cx.textBaseline='middle'; cx.fillText(T.n,b.x+b.w/2,b.y+b.h/2+1);
       if(b.hp<TYPEN[b.t].hp){ cx.strokeStyle='rgba(0,0,0,.65)'; cx.lineWidth=1; cx.beginPath(); cx.moveTo(b.x+b.w*.3,b.y); cx.lineTo(b.x+b.w*.45,b.y+b.h*.5); cx.lineTo(b.x+b.w*.35,b.y+b.h); if(b.hp===1&&TYPEN[b.t].hp===3){cx.moveTo(b.x+b.w*.7,b.y); cx.lineTo(b.x+b.w*.6,b.y+b.h*.6); cx.lineTo(b.x+b.w*.72,b.y+b.h)} cx.stroke() }
     });
-    // Blech von der Seite: leicht durchgebogen, Enden abgekantet
-    var l=px-PW/2, r=px+PW/2, d=defl*1.6;
-    cx.lineCap='butt'; cx.lineJoin='round';
-    cx.strokeStyle='#5d6672'; cx.lineWidth=9; cx.beginPath(); cx.moveTo(l,PY+4); cx.lineTo(l,PY+1); cx.quadraticCurveTo(px,PY+d*1.9,r,PY+1); cx.lineTo(r,PY+4); cx.stroke();
-    cx.strokeStyle='#cfd5dc'; cx.lineWidth=6.5; cx.beginPath(); cx.moveTo(l,PY+4); cx.lineTo(l,PY+1); cx.quadraticCurveTo(px,PY+d*1.9,r,PY+1); cx.lineTo(r,PY+4); cx.stroke();
-    cx.strokeStyle='rgba(255,255,255,.55)'; cx.lineWidth=1.5; cx.beginPath(); cx.moveTo(l+3,PY-1); cx.quadraticCurveTo(px,PY+d*1.9-2,r-3,PY-1); cx.stroke();
+    // Blech: flacher Stahlstreifen, federt beim Treffer in der Mitte nach unten durch
+    var l=px-PW/2, r=px+PW/2, d=defl*1.4, T=PY-3, B=PY+4;
+    function streifen(){ cx.beginPath(); cx.moveTo(l+2,T); cx.quadraticCurveTo(px,T+d*1.9,r-2,T); cx.quadraticCurveTo(r,T,r,T+2); cx.lineTo(r,B-2); cx.quadraticCurveTo(r,B,r-2,B); cx.quadraticCurveTo(px,B+d*1.9,l+2,B); cx.quadraticCurveTo(l,B,l,B-2); cx.lineTo(l,T+2); cx.quadraticCurveTo(l,T,l+2,T); cx.closePath() }
+    var pg=cx.createLinearGradient(0,T,0,B); pg.addColorStop(0,'#eef1f5'); pg.addColorStop(.45,'#b4bcc6'); pg.addColorStop(1,'#6a737f');
+    streifen(); cx.fillStyle=pg; cx.fill(); cx.strokeStyle='#2a2f36'; cx.lineWidth=1; cx.stroke();
+    cx.strokeStyle='rgba(255,255,255,.7)'; cx.lineWidth=1; cx.beginPath(); cx.moveTo(l+4,T+1.2); cx.quadraticCurveTo(px,T+1.2+d*1.9,r-4,T+1.2); cx.stroke();
     // Ball: Stahlkugel
     var bg=cx.createRadialGradient(bx-1.6,by-1.8,.5,bx,by,BR+1); bg.addColorStop(0,'#ffffff'); bg.addColorStop(.5,'#b9c0c9'); bg.addColorStop(1,'#59616d');
     cx.fillStyle=bg; cx.beginPath(); cx.arc(bx,by,BR,0,6.2832); cx.fill();

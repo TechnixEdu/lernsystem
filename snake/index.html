@@ -50,7 +50,7 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;border-radius:3px;t
 </head>
 <body>
 <div class="wrap" id="app">
-  <header><div><h1>Snake</h1><div class="sub" id="sub">Belohnung für die Challenge</div></div><div class="stat"><div>PUNKTE <span id="pt">0</span></div><div>REKORD <span id="rk">0</span></div></div></header>
+  <header><div><h1>Snake</h1><div class="sub" id="sub">Belohnung · du bist das Kabel</div></div><div class="stat"><div>PUNKTE <span id="pt">0</span></div><div>REKORD <span id="rk">0</span></div></div></header>
 
   <div class="gesperrt" id="sperre">
     <h2>Gesperrt</h2>
@@ -68,13 +68,13 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;border-radius:3px;t
         <button class="dn" type="button" data-d="d" aria-label="runter">▼</button>
         <button class="rt" type="button" data-d="r" aria-label="rechts">▶</button>
       </div>
-      <div class="hint">Wischen auf dem Spielfeld, die Pfeile oder Pfeiltasten und WASD. Tippen startet und pausiert. Wände sind tödlich.</div>
+      <div class="hint">Du bist das Kabel: Sammle Blitze und verlängere die Leitung. Wände und die eigene Leitung bedeuten Kurzschluss. Wischen auf dem Spielfeld, Pfeile oder Pfeiltasten und WASD; Tippen schaltet ein und unterbricht.</div>
     </div>
 
     <div class="karte" id="karte">
-      <div class="ti">SPIELSTAND</div>
+      <div class="ti">KURZSCHLUSS · SPIELSTAND</div>
       <div class="pt" id="kpt">0</div>
-      <div class="zl">Rekord auf diesem Gerät: <b id="krk">0</b><br>Fachfragen richtig: <b id="kfr">0</b><br><span id="kdat"></span></div>
+      <div class="zl">Blitze gesammelt: <b id="kbl">0</b><br>Rekord auf diesem Gerät: <b id="krk">0</b><br>Fachfragen richtig: <b id="kfr">0</b><br><span id="kdat"></span></div>
       <div class="sh">Zum Vorzeigen: Screenshot machen.</div>
     </div>
 
@@ -147,7 +147,7 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;border-radius:3px;t
   function ende(){
     clearTimeout(timer); zustand='tot';
     if(punkte>rekord){ rekord=punkte; rekDat=new Date().toLocaleDateString('de-DE'); schreib(KEY_REK,JSON.stringify({p:rekord,d:rekDat})); $('rk').textContent=rekord }
-    $('kpt').textContent=punkte; $('krk').textContent=rekord; $('kfr').textContent=richtig;
+    $('kpt').textContent=punkte; $('kbl').textContent=punkte/10; $('krk').textContent=rekord; $('kfr').textContent=richtig;
     $('kdat').textContent=new Date().toLocaleDateString('de-DE')+' · '+(THEMA.charAt(0).toUpperCase()+THEMA.slice(1));
     $('karte').style.display='block';
     if(navigator.vibrate){try{navigator.vibrate(120)}catch(e){}}
@@ -157,11 +157,21 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;border-radius:3px;t
     cx.fillStyle=BG; cx.fillRect(0,0,300,300);
     cx.fillStyle=SCH; for(var x=0;x<N;x++)for(var y=0;y<N;y++) cx.fillRect(x*Z+2,y*Z+2,Z-4,Z-4);
     cx.fillStyle=PX;
-    if(snake) snake.forEach(function(s){ cx.fillRect(s.x*Z+1,s.y*Z+1,Z-2,Z-2) });
-    if(apfel){ var ax=apfel.x*Z, ay=apfel.y*Z; cx.fillRect(ax+7,ay+2,6,16); cx.fillRect(ax+2,ay+7,16,6) }
+    if(snake) snake.forEach(function(s,i){
+      var px=s.x*Z, py=s.y*Z;
+      cx.fillStyle=PX; cx.fillRect(px+1,py+1,Z-2,Z-2);            // isolierte Leitung
+      if(i>0){ cx.fillStyle=BG; cx.fillRect(px+7,py+7,6,6); cx.fillStyle=PX; cx.fillRect(px+9,py+9,2,2) }   // Ader im Querschnitt
+      else {                                                       // Stecker mit zwei Kontakten
+        var v=V[dir];
+        [4,12].forEach(function(o){ var kx=v[0]? (v[0]>0?px+Z-1:px-4) : px+o, ky=v[1]? (v[1]>0?py+Z-1:py-4) : py+o; cx.fillRect(kx,ky,v[0]?5:4,v[1]?5:4) });
+        cx.fillStyle=BG; cx.fillRect(px+8,py+8,4,4); cx.fillStyle=PX;
+      }
+    });
+    if(apfel){ var ax=apfel.x*Z, ay=apfel.y*Z;                     // Blitz als Futter
+      cx.beginPath(); cx.moveTo(ax+14,ay+0); cx.lineTo(ax+3,ay+11); cx.lineTo(ax+9,ay+11); cx.lineTo(ax+6,ay+20); cx.lineTo(ax+18,ay+8); cx.lineTo(ax+11,ay+8); cx.lineTo(ax+16,ay+0); cx.closePath(); cx.fill() }
     cx.font='bold 17px ui-monospace,Consolas,monospace'; cx.textAlign='center'; cx.textBaseline='middle';
-    var t=zustand==='bereit'?'TIPPEN = START':zustand==='pause'?'PAUSE':zustand==='tot'?'GAME OVER':'';
-    if(t){ var w=cx.measureText(t).width+20; cx.fillStyle=BG; cx.fillRect(150-w/2,136,w,28); cx.fillStyle=PX; cx.strokeStyle=PX; cx.lineWidth=2; cx.strokeRect(150-w/2,136,w,28); cx.fillText(t,150,151) }
+    var t=zustand==='bereit'?'TIPPEN = EINSCHALTEN':zustand==='pause'?'UNTERBROCHEN':zustand==='tot'?'KURZSCHLUSS!':'';
+    if(t){ var w=cx.measureText(t).width+20; cx.fillStyle=BG; cx.fillRect(150-w/2,206,w,28); cx.fillStyle=PX; cx.strokeStyle=PX; cx.lineWidth=2; cx.strokeRect(150-w/2,206,w,28); cx.fillText(t,150,221) }
   }
 
   /* ---- Fachfrage nach dem Tod */

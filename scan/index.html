@@ -86,6 +86,7 @@ footer{margin-top:18px;font-size:13px;color:var(--dim);text-align:center;line-he
   }
   bStart.addEventListener('click',starten); bStop.addEventListener('click',function(){stoppen(); say('')});
   document.addEventListener('visibilitychange',function(){if(document.hidden&&laeuft) {stoppen(); say('Kamera angehalten.')}});
+  if(/[?&]start=1/.test(location.search)) starten();   // Link von der Startseite: Kamera sofort starten
   // nur zum Testen
   window.__scan={pruefe:pruefe,decode:function(data,w,h){return decodeData(data,w,h)},ok:function(u){return OK.test(u)}};
 })();

@@ -17,7 +17,12 @@ h1{font-size:22px;letter-spacing:.2em;text-transform:uppercase;margin:0 0 4px;co
 .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;font-size:15px;line-height:1.6}
 .box p{margin:0 0 10px}.box p:last-child{margin:0}
 a{color:var(--a)}
-.scan{display:block;margin-top:14px;text-align:center;text-decoration:none;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:14px;color:#04131c;background:var(--a);border-radius:10px;padding:13px 18px}
+.scan{display:block;width:100%;margin-top:14px;text-align:center;font:inherit;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:14px;color:#04131c;background:var(--a);border:0;border-radius:10px;padding:13px 18px;cursor:pointer}
+.cam{position:relative;margin-top:14px;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#000;display:none;aspect-ratio:1/1}
+.cam video{width:100%;height:100%;object-fit:cover;display:block}
+.cam .rahmen{position:absolute;inset:18%;border:3px solid var(--a);border-radius:12px;box-shadow:0 0 0 999px rgba(0,0,0,.35);pointer-events:none}
+.msg{margin-top:12px;font-size:15px;line-height:1.5;min-height:1.5em;text-align:center}
+.msg.ok{color:#4ade80}.msg.no{color:#f87171}
 footer{margin-top:18px;font-size:13px;color:var(--dim);text-align:center;line-height:1.7}
 </style>
 </head>
@@ -29,11 +34,60 @@ footer{margin-top:18px;font-size:13px;color:var(--dim);text-align:center;line-he
     <p>Hier liegen freiwillige Hilfen, Kontrollen und kleine Challenges zu meinen Arbeitsblättern. Du erreichst sie über den QR-Code auf dem jeweiligen Blatt.</p>
     <p>Die Angebote sind eigene Inhalte, laufen ohne Anmeldung und haben keinen Einfluss auf eine Bewertung.</p>
   </div>
-  <a class="scan" href="scan/?start=1">QR-Code scannen</a>
+  <button type="button" class="scan" id="scanBtn">QR-Code scannen</button>
+  <div class="cam" id="cam"><video id="v" playsinline muted></video><div class="rahmen"></div></div>
+  <div class="msg" id="msg" role="status" aria-live="polite"></div>
   <footer>
     Kontakt: <a href="mailto:christoph.sahlmann@bkbocholt-west.eu">christoph.sahlmann@bkbocholt-west.eu</a><br>
     <a href="datenschutz.html">Datenschutz</a>
   </footer>
 </div>
+<script>
+(function(){
+  'use strict';
+  var btn=document.getElementById('scanBtn'), cam=document.getElementById('cam'), v=document.getElementById('v'), msg=document.getElementById('msg');
+  var cv=document.createElement('canvas'), cx=cv.getContext('2d',{willReadFrequently:true});
+  var stream=null, laeuft=false, geladen=false;
+  // Nur Seiten von technixedu.de werden geöffnet, nie fremde Links.
+  var OK=/^https:\/\/(technixedu\.de|technixedu\.github\.io\/lernsystem)\/[A-Za-z0-9._\/?=&%-]*$/;
+  function say(t,c){msg.textContent=t; msg.className='msg'+(c?' '+c:'')}
+  function stoppen(){
+    laeuft=false; if(stream){stream.getTracks().forEach(function(t){t.stop()}); stream=null}
+    v.srcObject=null; cam.style.display='none'; btn.textContent='QR-Code scannen';
+  }
+  function schleife(){
+    if(!laeuft) return;
+    if(v.readyState>=2&&v.videoWidth){
+      var s=Math.min(1,640/v.videoWidth); cv.width=Math.round(v.videoWidth*s); cv.height=Math.round(v.videoHeight*s);
+      cx.drawImage(v,0,0,cv.width,cv.height);
+      var d=cx.getImageData(0,0,cv.width,cv.height), r=window.jsQR(d.data,cv.width,cv.height,{inversionAttempts:'attemptBoth'});
+      if(r&&r.data){
+        if(OK.test(r.data)){ stoppen(); say('Gefunden. Die Seite öffnet sich …','ok'); setTimeout(function(){location.href=r.data},400); return }
+        say('Das ist kein TechnixEdu-Code. Es wird nichts geöffnet.','no');
+      }
+    }
+    setTimeout(function(){requestAnimationFrame(schleife)},90);
+  }
+  function lade(cb){
+    if(geladen||window.jsQR){geladen=true; cb(); return}
+    var s=document.createElement('script'); s.src='scan/jsQR.js'; s.onload=function(){geladen=true; cb()};
+    s.onerror=function(){say('Der Scanner konnte nicht geladen werden. Nutze die Kamera-App deines Handys.','no')}; document.head.appendChild(s);
+  }
+  function starten(){
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){say('Dieser Browser kann die Kamera nicht öffnen. Nutze die Kamera-App deines Handys und scanne den Code dort.','no'); return}
+    say('Kamera wird gestartet …');
+    navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false}).then(function(s){
+      stream=s; v.srcObject=s; return v.play();
+    }).then(function(){
+      cam.style.display='block'; btn.textContent='Kamera stoppen'; say('Halte den QR-Code in den Rahmen.'); laeuft=true; schleife();
+    }).catch(function(e){
+      stoppen();
+      say((e&&e.name==='NotAllowedError')?'Der Kamerazugriff wurde nicht erlaubt. Erlaube ihn in den Browser-Einstellungen oder scanne mit der Kamera-App.':'Die Kamera konnte nicht gestartet werden. Scanne den Code mit der Kamera-App deines Handys.','no');
+    });
+  }
+  btn.addEventListener('click',function(){ if(laeuft){stoppen(); say('')} else lade(starten) });
+  document.addEventListener('visibilitychange',function(){if(document.hidden&&laeuft){stoppen(); say('Kamera angehalten.')}});
+})();
+</script>
 </body>
 </html>

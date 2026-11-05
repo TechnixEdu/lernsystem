@@ -67,7 +67,7 @@ h1{font-size:15px;letter-spacing:.22em;text-transform:uppercase;margin:0;font-we
   d.stufen.forEach(function(txt,i){
     var s=el('div','step'+(i?' lock':'')), h=el('button','head'); h.type='button'; if(i) h.disabled=true;
     h.appendChild(el('span','num','HILFE '+(i+1))); h.appendChild(el('span','t',titles[i])); var st=el('span','s', i?'GESPERRT':'ÖFFNEN'); h.appendChild(st);
-    var b=el('div','body',txt); s.appendChild(h); s.appendChild(b); box.appendChild(s); steps.push({s:s,h:h,st:st});
+    var b=el('div','body'); b.innerHTML=txt; s.appendChild(h); s.appendChild(b); box.appendChild(s); steps.push({s:s,h:h,st:st});
     h.addEventListener('click',function(){
       s.classList.add('open'); st.textContent='OFFEN'; h.disabled=true;
       if(steps[i+1]){steps[i+1].s.classList.remove('lock'); steps[i+1].h.disabled=false; steps[i+1].st.textContent='ÖFFNEN'}

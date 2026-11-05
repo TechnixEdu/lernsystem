@@ -1,6 +1,6 @@
 // Service Worker: legt die Seiten beim ersten Aufruf im Cache ab, danach laufen sie ohne Internet.
 // Der Cache-Name enthaelt die Pruefsumme der Seiten, neue Fassungen werden dadurch automatisch geladen.
-const CACHE = 'ls-reihenschaltung-1143af6121';
+const CACHE = 'ls-reihenschaltung-b97a6a33a2';
 const FILES = ['./', 'bombe.html', 'hilfe.html', 'kontrolle.html'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

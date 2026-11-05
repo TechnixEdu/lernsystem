@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070b12">
+<title>Ergebnis-Kontrolle: Reihenschaltung</title>
+<style>
+:root{--bg:#070b12;--panel:#0e1623;--panel2:#142034;--line:#1f3050;--text:#dbe7f5;--dim:#7f93ad;--cyan:#19e3ff;--cyan-d:#0a8aa0;--ok:#2dff9a;--warn:#ffb020;--bad:#ff4d6a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{min-height:100vh;background:radial-gradient(900px 420px at 50% -120px,rgba(25,227,255,.13),transparent 70%),linear-gradient(rgba(25,227,255,.035) 1px,transparent 1px) 0 0/100% 28px,var(--bg);padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
+.wrap{max-width:440px;margin:0 auto}
+h1{font-size:15px;letter-spacing:.22em;text-transform:uppercase;margin:0;font-weight:600;color:var(--cyan)}
+.sub{font-size:12px;color:var(--dim);letter-spacing:.04em;margin:3px 0 16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h2{margin:0 0 4px;font-size:16px}
+.card p{margin:0;color:var(--dim);font-size:13px;line-height:1.4}
+.pick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pick a{display:block;text-align:center;border:1px solid var(--cyan-d);border-radius:10px;padding:14px 6px;color:var(--cyan);text-decoration:none;font:700 13px ui-monospace,Consolas,monospace;letter-spacing:.06em;background:rgba(25,227,255,.06)}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.row:last-of-type{border-bottom:0}
+.lab{flex:1 1 100%;font-size:14px}
+.lab i{font-style:italic}
+.in{display:flex;align-items:center;gap:8px;flex:1 1 auto}
+input,select{font:inherit;font-size:16px;color:var(--text);background:#060b14;border:1px solid var(--cyan-d);border-radius:8px;padding:9px 10px;min-width:0}
+input[type=text]{width:96px;font-family:ui-monospace,Consolas,monospace}
+input.sm{width:64px}
+select{max-width:100%}
+input:focus,select:focus{outline:2px solid var(--cyan);outline-offset:1px}
+.st{flex:0 0 auto;width:24px;height:24px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#2c4366}
+.st.ok{border-color:var(--ok);color:#04120b;background:var(--ok);box-shadow:0 0 12px rgba(45,255,154,.5)}
+.st.no{border-color:var(--warn);color:#201400;background:var(--warn)}
+.fb{flex:1 1 100%;font-size:13px;color:var(--warn);line-height:1.4;display:none}
+.fb.show{display:block}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.btn{appearance:none;border:1px solid var(--cyan);background:rgba(25,227,255,.08);color:var(--cyan);font:700 13px ui-monospace,Consolas,monospace;letter-spacing:.16em;padding:12px 22px;border-radius:10px;cursor:pointer;box-shadow:0 0 18px rgba(25,227,255,.2)}
+.btn:active{background:rgba(25,227,255,.22)}
+.btn.sec{border-color:var(--line);color:var(--dim);box-shadow:none;background:none;letter-spacing:.08em}
+.msg{margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.5;display:none}
+.msg.show{display:block}
+.msg.ok{border-color:#145a3a;background:rgba(45,255,154,.07)}
+.msg.warn{border-color:#5a4210}
+.muster{margin-top:12px;border:1px dashed var(--cyan-d);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.55;display:none;white-space:pre-line}
+.muster.show{display:block}
+.muster b{color:var(--cyan)}
+.nav{display:flex;justify-content:space-between;margin-top:16px;font-size:13px}
+.nav a{color:var(--dim)}
+.note{margin-top:14px;font-size:12px;color:var(--dim);line-height:1.5;text-align:center}
+.pop{animation:pop .4s}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.015)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.pop{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kontrolle</h1>
+  <div class="sub">Ergebnisse prüfen · Reihenschaltung</div>
+  <div id="app"></div>
+  <p class="note">Rechne zuerst auf dem Blatt, dann trage dein Ergebnis ein. Du kannst Komma oder Punkt schreiben.<br>Funktioniert ohne Internet, sobald die Seite einmal geladen wurde.<br><a href="https://technixedu.de/datenschutz.html" style="color:inherit">Datenschutz</a></p>
+</div>
+<script>
+(function(){
+  'use strict';
+  // Feldarten: num (Zahl + Einheit), ratio (a : b), wahl (Auswahl). tol = erlaubte relative Abweichung.
+  var EH={Ohm:[['Ω',1],['kΩ',1000]],V:[['V',1],['mV',0.001]],A:[['A',1],['mA',0.001]]};
+  var D={"thema": "Rückfederung beim Biegen", "reihenfolge": ["1", "2", "3", "4"], "aufgaben": {"1": {"titel": "Rückfederungsfaktoren vergleichen", "felder": [{"t": "wahl", "l": "Welcher Werkstoff federt bei gleichem Verhältnis am stärksten zurück?", "o": ["DC01", "X12CrNi18-8", "AlCuMg1"], "r": 2}, {"t": "wahl", "l": "Wird das Verhältnis <i>r</i><sub>2</sub>/<i>s</i> größer, wird der Faktor <i>k</i><sub>R</sub> …", "o": ["größer", "kleiner", "bleibt gleich"], "r": 1}, {"t": "wahl", "l": "Ein kleinerer Faktor <i>k</i><sub>R</sub> bedeutet am Werkzeug …", "o": ["weniger überbiegen", "mehr überbiegen", "gleich viel überbiegen"], "r": 1}], "hinweis": "Vergleiche die drei Zeilen der Tabelle bei gleicher Spalte und dann eine Zeile von links nach rechts.", "muster": "Aluminiumlegierung federt am stärksten (kleinster Faktor); der Faktor sinkt mit wachsendem Verhältnis r2/s; kleinerer Faktor heißt mehr Überbiegen."}, "2": {"titel": "Werkzeug für den Befestigungswinkel", "felder": [{"t": "num", "l": "Werkzeugwinkel <i>α</i><sub>1</sub> in Grad", "e": "plain", "v": 93.75, "tol": 0.003, "falsch": [[86.4, "Teile durch den Faktor, multipliziere nicht."], [90.0, "Das ist der Winkel am fertigen Teil. Das Werkzeug muss weiter biegen."]]}, {"t": "num", "l": "Werkzeugradius <i>r</i><sub>1</sub> in mm", "e": "plain", "v": 14.37, "tol": 0.003, "falsch": [[15.0, "Das ist der Radius am Teil. Der Werkzeugradius ist etwas kleiner."]]}], "hinweis": "Erst r2/s bilden, dann den Faktor suchen. Danach beide Formeln nacheinander.", "muster": "Werkzeugwinkel α1 = 93,75°; Werkzeugradius r1 = 14,37 mm"}, "3": {"titel": "Stahl oder Aluminium", "felder": [{"t": "num", "l": "X12CrNi18-8: Werkzeugwinkel <i>α</i><sub>1</sub> in Grad", "e": "plain", "v": 94.7368, "tol": 0.003, "falsch": [[85.5, "Teile durch den Faktor, multipliziere nicht."]]}, {"t": "num", "l": "X12CrNi18-8: Werkzeugradius <i>r</i><sub>1</sub> in mm", "e": "plain", "v": 7.55, "tol": 0.008}, {"t": "num", "l": "AlCuMg1: Werkzeugwinkel <i>α</i><sub>1</sub> in Grad", "e": "plain", "v": 107.1429, "tol": 0.003, "falsch": [[75.6, "Teile durch den Faktor, multipliziere nicht."]]}, {"t": "num", "l": "AlCuMg1: Werkzeugradius <i>r</i><sub>1</sub> in mm", "e": "plain", "v": 6.56, "tol": 0.008}, {"t": "wahl", "l": "Passt das Werkzeug für Stahl auch für Aluminium?", "o": ["ja, der Unterschied ist klein", "nein, der Winkel weicht zu stark ab"], "r": 1}], "hinweis": "Beide Werkstoffe haben dasselbe Verhältnis r2/s, aber verschiedene Faktoren.", "muster": "Stahl: α1 = 94,74°, r1 = 7,55 mm; Aluminium: α1 = 107,14°, r1 = 6,56 mm; das Werkzeug ist nicht übertragbar.", "nur": "Die Empfehlung an den Kunden vergleichst du mit der Musterantwort:"}, "4": {"titel": "Reklamation Winkelblech", "felder": [{"t": "num", "l": "Winkel am Teil bei Werkzeugwinkel 90° in Grad", "e": "plain", "v": 86.4, "tol": 0.003, "falsch": [[90, "Das Blech federt zurück, der Winkel am Teil ist kleiner."]]}, {"t": "num", "l": "Tatsächlicher Rückfederungsfaktor <i>k</i><sub>R</sub> der neuen Charge", "e": "plain", "v": 0.9333, "tol": 0.006, "falsch": [[0.9722, "Teile durch den Winkel am Werkzeug (93,75°), nicht durch 90°."]]}], "hinweis": "Der Faktor ist Winkel am Teil geteilt durch Winkel am Werkzeug.", "muster": "α2 = 86,4°; tatsächlicher Faktor 0,933: Die neue Charge federt stärker zurück als erwartet.", "nur": "Die Ursachen und die Reaktion vergleichst du mit der Musterantwort:"}}};
+  var T=D.aufgaben, ORDER=D.reihenfolge;
+  document.querySelector('.sub').textContent='Ergebnisse prüfen · '+D.thema;
+  var app=document.getElementById('app');
+  function el(t,c,h){var e=document.createElement(t); if(c) e.className=c; if(h!==undefined) e.innerHTML=h; return e}
+  var m=/[?&]a=(\d+)/.exec(location.search), a=m&&T[m[1]]?m[1]:null;
+
+  if(!a){
+    var c=el('div','card'); c.appendChild(el('h2','','Zu welcher Aufgabe?')); c.appendChild(el('p','','Wähle die Aufgabe, deren Ergebnis du prüfen möchtest.')); app.appendChild(c);
+    var g=el('div','pick'); ORDER.forEach(function(k){var l=el('a','','Aufgabe '+k); l.href='?a='+k; g.appendChild(l)}); app.appendChild(g); return;
+  }
+
+  var d=T[a], card=el('div','card'); card.appendChild(el('h2','','Aufgabe '+a+': '+d.titel)); card.appendChild(el('p','','Trage dein Ergebnis ein und tippe auf „Prüfen“.')); app.appendChild(card);
+  var form=el('div','card'); app.appendChild(form);
+  var fields=[], fails=0;
+
+  function parse(s){s=(s||'').toString().trim().replace(',','.'); if(s==='') return NaN; return Number(s)}
+  d.felder.forEach(function(f){
+    var row=el('div','row'); row.appendChild(el('div','lab',f.l));
+    var inw=el('div','in'), inp, sel, inp2;
+    if(f.t==='num'){
+      inp=el('input'); inp.type='text'; inp.inputMode='decimal'; inp.autocomplete='off'; inp.setAttribute('aria-label','Zahl');
+      sel=el('select'); EH[f.e].forEach(function(u,i){var o=el('option','',u[0]); o.value=i; sel.appendChild(o)});
+      inw.appendChild(inp); inw.appendChild(sel);
+    } else if(f.t==='ratio'){
+      inp=el('input','sm'); inp.type='text'; inp.inputMode='decimal'; inp2=el('input','sm'); inp2.type='text'; inp2.inputMode='decimal';
+      inw.appendChild(inp); inw.appendChild(el('span','',':')); inw.appendChild(inp2);
+    } else {
+      sel=el('select'); var o0=el('option','','– wählen –'); o0.value='-1'; sel.appendChild(o0);
+      f.o.forEach(function(x,i){var o=el('option','',x); o.value=i; sel.appendChild(o)}); inw.appendChild(sel);
+    }
+    var st=el('div','st','·'), fb=el('div','fb');
+    row.appendChild(inw); row.appendChild(st); row.appendChild(fb); form.appendChild(row);
+    fields.push({f:f,inp:inp,inp2:inp2,sel:sel,st:st,fb:fb});
+    [inp,inp2,sel].forEach(function(x){ if(x) x.addEventListener('input',function(){st.className='st';st.textContent='·';fb.className='fb'}); if(x&&x.tagName==='SELECT') x.addEventListener('change',function(){st.className='st';st.textContent='·';fb.className='fb'}) });
+  });
+
+  var btns=el('div','btns'), bCheck=el('button','btn','PRÜFEN'), bShow=el('button','btn sec','Ergebnis anzeigen');
+  bCheck.type='button'; bShow.type='button'; bShow.style.display='none'; btns.appendChild(bCheck); btns.appendChild(bShow); form.appendChild(btns);
+  var msg=el('div','msg'); form.appendChild(msg);
+  var mu=el('div','muster'); form.appendChild(mu);
+
+  function setOk(x){x.st.className='st ok'; x.st.textContent='✓'; x.fb.className='fb'}
+  function setNo(x,text){x.st.className='st no'; x.st.textContent='!'; if(text){x.fb.textContent=text; x.fb.className='fb show'} else x.fb.className='fb'}
+
+  function checkField(x){
+    var f=x.f;
+    if(f.t==='num'){
+      var n=parse(x.inp.value); if(isNaN(n)) return {ok:false,leer:true,text:'Bitte eine Zahl eingeben.'};
+      var got=n*EH[f.e][+x.sel.value][1], exp=f.v, tol=f.tol||0.012;
+      if(Math.abs(got-exp)<=Math.abs(exp)*tol) return {ok:true};
+      var r=got/exp;
+      if(Math.abs(r/1000-1)<0.02||Math.abs(r*1000-1)<0.02) return {ok:false,text:'Fast: Der Zahlenwert passt, aber die Einheit nicht. Prüfe Milli (m) oder Kilo (k).'};
+      var fl=f.falsch||[]; for(var i=0;i<fl.length;i++){ var base=fl[i][0]; if(Math.abs(got-base)<=Math.abs(base)*0.012||Math.abs(n-base)<=Math.abs(base)*0.012) return {ok:false,text:fl[i][1]} }
+      return {ok:false,text:'Noch nicht ganz. Rechne die Aufgabe noch einmal Schritt für Schritt.'};
+    }
+    if(f.t==='ratio'){
+      var p=parse(x.inp.value), q=parse(x.inp2.value); if(isNaN(p)||isNaN(q)||q===0) return {ok:false,leer:true,text:'Bitte beide Zahlen eingeben.'};
+      if(Math.abs(p/q-f.a/f.b)<=0.012*(f.a/f.b)) return {ok:true};
+      if(Math.abs(p/q-f.b/f.a)<=0.012*(f.b/f.a)) return {ok:false,text:'Fast: Die Reihenfolge ist vertauscht. Welcher Widerstand ist größer?'};
+      return {ok:false,text:'Noch nicht ganz. Vergleiche die beiden Widerstände.'};
+    }
+    var v=+x.sel.value; if(v<0) return {ok:false,leer:true,text:'Bitte eine Antwort wählen.'};
+    return v===f.r?{ok:true}:{ok:false,text:''};
+  }
+
+  function check(){
+    var ok=0, leer=0, wrong=0;
+    fields.forEach(function(x){
+      var r=checkField(x);
+      if(r.ok){setOk(x);ok++} else if(r.leer){setNo(x,r.text);leer++} else {setNo(x,r.text);wrong++}
+    });
+    msg.className='msg show'; form.classList.remove('pop'); void form.offsetWidth;
+    if(ok===fields.length){
+      msg.className='msg show ok'; msg.innerHTML='<b>Alles richtig.</b> Gut gerechnet!'+next(); form.classList.add('pop'); if(navigator.vibrate){try{navigator.vibrate(40)}catch(e){}}
+      bShow.style.display='none';
+    } else {
+      if(wrong>0) fails++;
+      msg.className='msg show warn';
+      msg.innerHTML='<b>'+ok+' von '+fields.length+' richtig.</b> '+(leer?'Fülle noch alle Felder aus. ':'')+'Überlege noch einmal.<br><small>'+d.hinweis+'</small>';
+      if(fails>=2) bShow.style.display='inline-block';
+    }
+  }
+  function next(){var i=ORDER.indexOf(a); return i<ORDER.length-1?'<br><small><a style="color:var(--cyan)" href="?a='+ORDER[i+1]+'">Weiter zu Aufgabe '+ORDER[i+1]+'</a></small>':''}
+  bCheck.addEventListener('click',check);
+  bShow.addEventListener('click',function(){mu.className='muster show'; mu.innerHTML='<b>Ergebnis</b>\n'+d.muster+(d.nur?'\n\n<small>'+d.nur+'</small>':'')});
+  if(d.nur){ var b2=el('button','btn sec','Teil b) vergleichen'); b2.type='button'; btns.appendChild(b2); b2.addEventListener('click',function(){mu.className='muster show'; mu.innerHTML='<b>Musterantwort</b>\n'+d.muster}) }
+
+  var nav=el('div','nav'); var i=ORDER.indexOf(a);
+  nav.appendChild(i>0?(function(){var l=el('a','','← Aufgabe '+ORDER[i-1]); l.href='?a='+ORDER[i-1]; return l})():el('span','',''));
+  var all=el('a','','Alle Aufgaben'); all.href='kontrolle.html'; nav.appendChild(all);
+  nav.appendChild(i<ORDER.length-1?(function(){var l=el('a','','Aufgabe '+ORDER[i+1]+' →'); l.href='?a='+ORDER[i+1]; return l})():el('span','',''));
+  app.appendChild(nav);
+
+  if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){try{navigator.serviceWorker.register('sw.js')}catch(e){}}
+  window.__kontrolle={fill:function(vals){fields.forEach(function(x,k){var v=vals[k]; if(v===undefined) return; if(x.f.t==='num'){x.inp.value=v[0]; x.sel.value=v[1]||0} else if(x.f.t==='ratio'){x.inp.value=v[0]; x.inp2.value=v[1]} else x.sel.value=v})},check:check};   // nur zum Testen
+})();
+</script>
+</body>
+</html>

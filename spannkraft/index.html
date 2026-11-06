@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070b12">
+<title>Spannkraft-Balance</title>
+<style>
+:root{--bg:#070b12;--panel:#0e1623;--line:#1f3050;--text:#dbe7f5;--dim:#7f93ad;--a:#19e3ff;--a2:#0a8aa0;--ok:#2dff9a;--bad:#ff4d6a;--warn:#ffb020;--glow:25,227,255}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{min-height:100vh;background:radial-gradient(900px 420px at 50% -120px,rgba(var(--glow),.13),transparent 70%),linear-gradient(rgba(25,227,255,.035) 1px,transparent 1px) 0 0/100% 28px,var(--bg);padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
+.wrap{max-width:420px;margin:0 auto}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+h1{font-size:15px;letter-spacing:.22em;text-transform:uppercase;margin:0;color:var(--a);font-weight:700}
+.sub{font-size:12px;color:var(--dim);margin-top:3px}
+.stat{font:700 11px ui-monospace,Consolas,monospace;letter-spacing:.12em;color:var(--warn);text-align:right;line-height:1.6;white-space:nowrap}
+.case{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px}
+canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;border-radius:8px;touch-action:none;background:#060b14;border:1px solid var(--a2)}
+.halten{display:block;width:100%;margin-top:12px;appearance:none;border:1px solid var(--a);background:rgba(var(--glow),.12);color:var(--a);font:700 15px ui-monospace,Consolas,monospace;letter-spacing:.18em;padding:18px;border-radius:12px;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 0 16px rgba(var(--glow),.2)}
+.halten.an{background:rgba(var(--glow),.34)}
+.hint{margin-top:10px;font-size:12px;color:var(--dim);text-align:center;line-height:1.45}
+.panel{display:none;margin-top:10px;background:var(--panel);border:1px solid var(--a2);border-radius:14px;padding:14px}
+.panel .tag{font:700 11px ui-monospace,Consolas,monospace;letter-spacing:.14em;color:var(--a);margin-bottom:6px}
+.panel .q{font-size:14.5px;line-height:1.5;margin-bottom:10px}
+.opts{display:grid;gap:8px}
+.opt{appearance:none;text-align:left;border:1px solid var(--a2);background:rgba(0,0,0,.35);color:var(--text);font:inherit;font-size:14px;line-height:1.4;padding:11px 12px;border-radius:10px;cursor:pointer}
+.opt:active{background:rgba(var(--glow),.2)}
+.fb{margin-top:10px;font-size:13.5px;line-height:1.45;color:var(--warn);min-height:1em}
+.btn{appearance:none;border:1px solid var(--a);background:rgba(var(--glow),.12);color:var(--a);font:700 13px ui-monospace,Consolas,monospace;letter-spacing:.16em;padding:11px 18px;border-radius:10px;cursor:pointer;box-shadow:0 0 16px rgba(var(--glow),.22)}
+.karte{display:none;margin-top:10px;border:1px solid var(--ok);border-radius:14px;padding:14px;text-align:center;background:radial-gradient(circle at 50% 0,rgba(53,255,160,.15),transparent 70%)}
+.karte .ti{font:700 11px ui-monospace,Consolas,monospace;letter-spacing:.2em;color:var(--ok)}
+.karte .pt{font:700 40px ui-monospace,Consolas,monospace;color:var(--text);margin:4px 0}
+.karte .zl{font:13px ui-monospace,Consolas,monospace;color:var(--text);line-height:1.7}
+.karte .zl b{color:var(--ok)}
+.karte .sh{margin-top:6px;font-size:12px;color:var(--dim)}
+.gesperrt{display:none;text-align:center;background:var(--panel);border:1px solid var(--a2);border-radius:16px;padding:22px 16px}
+.gesperrt h2{margin:0 0 8px;font-size:16px;letter-spacing:.16em;color:var(--a);text-transform:uppercase}
+.gesperrt p{margin:0 0 14px;font-size:14px;line-height:1.5}
+.gesperrt a{display:inline-block;text-decoration:none}
+.foot{margin-top:14px;font-size:11.5px;color:var(--dim);text-align:center;line-height:1.5}
+.shake{animation:sh .4s}
+@keyframes sh{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header><div><h1>Spannkraft-Balance</h1><div class="sub" id="sub">Belohnung · spanne das Werkstück richtig</div></div><div class="stat"><div>PUNKTE <span id="pt">0</span></div><div>REKORD <span id="rk">0</span></div></div></header>
+
+  <div class="gesperrt" id="sperre">
+    <h2>Gesperrt</h2>
+    <p>Dieses Spiel ist die Belohnung für das Arbeitsblatt. Es wird freigeschaltet, sobald du mindestens 80 % der Aufgaben auf der Kontrollseite richtig gelöst hast. <span id="stand"></span></p>
+    <a class="btn" id="zurch" href="../">ZUR KONTROLLE</a>
+  </div>
+
+  <div id="spiel" style="display:none">
+    <div class="case">
+      <canvas id="cv" width="300" height="300" aria-label="Spielfeld"></canvas>
+      <button class="halten" type="button" id="halt">SPANNEN (GEDRÜCKT HALTEN)</button>
+      <div class="hint">Halte die Taste gedrückt, dann steigt die Spannkraft, lässt du los, sinkt sie. Bleibe über der <b>orangen Linie</b> (Schnittkraft, das Teil rutscht sonst) und unter der <b>roten Linie</b> (die Wand verformt sich). Leertaste oder Maus gehen auch.</div>
+    </div>
+
+    <div class="karte" id="karte">
+      <div class="ti" id="kti">SPANNUNG VERLOREN · SPIELSTAND</div>
+      <div class="pt" id="kpt">0</div>
+      <div class="zl">Sicher gespannt: <b id="ksek">0</b> s<br>Rekord auf diesem Gerät: <b id="krk">0</b><br>Fachfragen richtig: <b id="kfr">0</b><br><span id="kdat"></span></div>
+      <div class="sh">Zum Vorzeigen: Screenshot machen.</div>
+    </div>
+
+    <div class="panel" id="panel">
+      <div class="tag" id="ptag">FACHFRAGE</div>
+      <div class="q" id="pq"></div>
+      <div class="opts" id="po"></div>
+      <div class="fb" id="pfb" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <p class="foot">Funktioniert ohne Internet, sobald die Seite einmal geladen wurde.<br>Das Spiel ist freiwillig. Der Rekord wird nur auf diesem Gerät gespeichert.<br><a href="https://technixedu.de/datenschutz.html" style="color:inherit">Datenschutz</a></p>
+</div>
+<script>
+(function(){
+  'use strict';
+  var Q=new URLSearchParams(location.search);
+  var THEMA=(Q.get('t')||'spannplanung').replace(/[^a-z0-9-]/g,'')||'spannplanung';
+  var KEY_REK='ls-spann-rekord-'+THEMA;
+  function lies(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function schreib(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  var $=function(i){return document.getElementById(i)};
+  $('zurch').href='../'+THEMA+'/kontrolle.html';
+
+  /* ---- Sperre: mindestens 80 % der Aufgaben der Kontrollseite richtig gespeichert (ls-fort/ls-plan im Browser) */
+  var PLAN=[],FORT=[]; try{PLAN=JSON.parse(lies('ls-plan-'+THEMA)||'[]');FORT=JSON.parse(lies('ls-fort-'+THEMA)||'[]')}catch(e){}
+  PLAN=Array.isArray(PLAN)?PLAN.map(String):[]; FORT=Array.isArray(FORT)?FORT:[];
+  var GESCHAFFT=PLAN.filter(function(i){return FORT.indexOf(i)>=0}).length, BRAUCHT=Math.floor((PLAN.length*4+4)/5), FREI=PLAN.length>0&&GESCHAFFT>=BRAUCHT;
+  if(!FREI&&$('stand')) $('stand').textContent=PLAN.length?('Bisher '+GESCHAFFT+' von '+PLAN.length+', nötig sind '+BRAUCHT+'.'):'Öffne zuerst die Kontrollseite.';
+  if(!FREI){ $('sperre').style.display='block'; if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){try{navigator.serviceWorker.register('sw.js')}catch(e){}} return }
+  $('spiel').style.display='block';
+
+  /* ---- Fragen laden */
+  var FR=[], bag=[], letzte=-1, richtig=0;
+  var sc=document.createElement('script'); sc.src='fragen_'+THEMA+'.js'; sc.onload=function(){FR=window.FRAGEN||[]}; sc.onerror=function(){FR=[]}; document.head.appendChild(sc);
+  function naechsteFrage(){
+    if(!FR.length) return -1;
+    if(!bag.length){ for(var i=0;i<FR.length;i++) bag.push(i); for(var j=bag.length-1;j>0;j--){var k=Math.floor(Math.random()*(j+1)); var t=bag[j]; bag[j]=bag[k]; bag[k]=t}
+      if(bag.length>1 && bag[bag.length-1]===letzte){ var x=bag.pop(); bag.unshift(x) } }
+    letzte=bag.pop(); return letzte;
+  }
+
+  /* ---- Spiel: Spannkraft F (0 bis 100) steigt beim Halten, sinkt beim Loslassen.
+     Untere Grenze L(t) = Schnittkraft (das Teil rutscht darunter), obere Grenze U(t) = Verformung der Wand (sinkt langsam).
+     Ausserhalb des Bands waechst die Gefahr g; bei g >= 1 ist die Spannung verloren. */
+  var cv=$('cv'), cx=cv.getContext('2d');
+  var zustand='bereit', t=0, F=0, g=0, halten=false, punkte=0, rekord=0, rekDat='', grund='', spitzen=[], naechste=3;
+  var r0=lies(KEY_REK); if(r0){ try{var o=JSON.parse(r0); rekord=+o.p||0; rekDat=o.d||''}catch(e){} }
+  $('rk').textContent=rekord;
+  function neu(){ t=0; F=0; g=0; punkte=0; grund=''; spitzen=[]; naechste=3; $('pt').textContent=0; zeichne() }
+  function untere(){
+    var ein=Math.min(1,t/1.5), amp=10+Math.min(10,t/6), s=0;
+    for(var i=0;i<spitzen.length;i++){ var d=t-spitzen[i]; if(d>=0&&d<=0.9) s=Math.max(s,amp*Math.sin(Math.PI*d/0.9)) }
+    return ein*(34+12*Math.sin(t*1.1)+6*Math.sin(t*2.7+1)+s);
+  }
+  function obere(){ return Math.max(78,92-t*0.5) }
+  function schritt(dt){
+    if(zustand!=='laeuft') return;
+    t+=dt;
+    if(t>=naechste){ spitzen.push(naechste); naechste+=Math.max(1.6,3.4-t*0.03)+Math.random()*1.6; if(spitzen.length>6) spitzen.shift() }
+    F+=(halten?70:-55)*dt; F=Math.max(0,Math.min(100,F));
+    var L=untere(), U=obere(), aussen=(F<L)?-1:(F>U)?1:0;
+    if(aussen){ g+=dt/0.9; grund=aussen<0?'rutsch':'zu fest' } else g=Math.max(0,g-dt/0.6);
+    var p=Math.floor(t)*10; if(p!==punkte){ punkte=p; $('pt').textContent=punkte }
+    if(g>=1){ ende(); return }
+    zeichne();
+  }
+  var letztes=0;
+  function lauf(ts){ if(zustand==='laeuft'){ var dt=letztes?Math.min(0.05,(ts-letztes)/1000):0.016; letztes=ts; schritt(dt) } else letztes=0; requestAnimationFrame(lauf) }
+  requestAnimationFrame(lauf);
+  function start(){ if(zustand!=='bereit') return; $('karte').style.display='none'; zustand='laeuft'; letztes=0 }
+  function ende(){
+    zustand='tot'; halten=false; $('halt').classList.remove('an');
+    if(punkte>rekord){ rekord=punkte; rekDat=new Date().toLocaleDateString('de-DE'); schreib(KEY_REK,JSON.stringify({p:rekord,d:rekDat})); $('rk').textContent=rekord }
+    $('kti').textContent=(grund==='rutsch'?'WERKSTÜCK DURCHGERUTSCHT':'WAND EINGEDRÜCKT')+' · SPIELSTAND';
+    $('kpt').textContent=punkte; $('ksek').textContent=Math.floor(t); $('krk').textContent=rekord; $('kfr').textContent=richtig;
+    $('kdat').textContent=new Date().toLocaleDateString('de-DE')+' · '+(THEMA.charAt(0).toUpperCase()+THEMA.slice(1));
+    $('karte').style.display='block';
+    if(navigator.vibrate){try{navigator.vibrate(120)}catch(e){}}
+    zeichne(); zeigeFrage('');
+  }
+  function zeichne(){
+    var U=obere(), L=untere(), gy=function(v){return 270-v*2.4};
+    cx.fillStyle='#060b14'; cx.fillRect(0,0,300,300);
+    // Futter und Werkstueck (links), Backen bewegen sich mit der Spannkraft
+    var mx=105, my=150, wob=(zustand==='laeuft'&&F<L)?Math.sin(t*40)*Math.min(3,(L-F)*0.15):0;
+    cx.fillStyle='#142034'; cx.beginPath(); cx.arc(mx,my,88,0,7); cx.fill(); cx.strokeStyle='#1f3050'; cx.lineWidth=2; cx.stroke();
+    var rw=40-(F>U?(F-U)*0.25:0), rj=rw+3;
+    for(var k=0;k<3;k++){ var a=-Math.PI/2+k*2*Math.PI/3; cx.save(); cx.translate(mx,my); cx.rotate(a); cx.fillStyle=(F>U&&zustand!=='bereit')?'#c24444':'#7f8b99'; cx.fillRect(rj,-12,60-(100-F)*0.12,24); cx.restore() }
+    cx.save(); cx.translate(mx+wob,my); cx.fillStyle=(F<L&&zustand==='laeuft')?'#d0a24a':'#aab4bf'; cx.beginPath();
+    if(F>U){ for(var q=0;q<=36;q++){ var aa=q*Math.PI/18, rr=rw-(F-U)*0.1*Math.cos(3*aa); cx.lineTo(Math.cos(aa)*rr,Math.sin(aa)*rr) } } else cx.arc(0,0,rw,0,7);
+    cx.fill(); cx.strokeStyle='#5a6572'; cx.lineWidth=2; cx.stroke();
+    var rot=(zustand==='laeuft'?t*(F<L?5:1.2):0); cx.strokeStyle='#2a323c'; cx.beginPath(); cx.moveTo(0,0); cx.lineTo(Math.cos(rot)*rw*0.8,Math.sin(rot)*rw*0.8); cx.stroke(); cx.restore();
+    // Werkzeug mit Schnittkraft (Pfeil laenger = mehr Schnittkraft)
+    var pl=8+L*0.45; cx.strokeStyle='#ffb020'; cx.fillStyle='#ffb020'; cx.lineWidth=3; cx.beginPath(); cx.moveTo(mx+rw+4+pl,my-56); cx.lineTo(mx+rw+4,my-56); cx.stroke();
+    cx.beginPath(); cx.moveTo(mx+rw-2,my-56); cx.lineTo(mx+rw+8,my-62); cx.lineTo(mx+rw+8,my-50); cx.fill();
+    cx.font='10px ui-monospace,Consolas,monospace'; cx.textAlign='left'; cx.fillStyle='#8d99a8'; cx.fillText('Schnittkraft',mx+rw-6,my-70);
+    // Anzeige (rechts)
+    cx.fillStyle="#070b12"; cx.fillRect(222,24,50,252); cx.strokeStyle='#1f3050'; cx.lineWidth=1; cx.strokeRect(222.5,24.5,50,252);
+    cx.fillStyle='rgba(53,255,160,.16)'; cx.fillRect(223,gy(U),49,Math.max(0,gy(L)-gy(U)));
+    cx.strokeStyle='#ff4d6a'; cx.lineWidth=2; cx.beginPath(); cx.moveTo(222,gy(U)); cx.lineTo(272,gy(U)); cx.stroke();
+    cx.strokeStyle='#ffb020'; cx.beginPath(); cx.moveTo(222,gy(L)); cx.lineTo(272,gy(L)); cx.stroke();
+    cx.fillStyle='#ff4d6a'; cx.textAlign='center'; cx.fillText('verformt',247,16);
+    cx.fillStyle='#ffb020'; cx.fillText('rutscht',247,291);
+    var fc=(F<L||F>U)?'#ffb020':'#2dff9a'; cx.fillStyle=fc; cx.fillRect(224,gy(F)-3,46,6);
+    cx.beginPath(); cx.moveTo(220,gy(F)); cx.lineTo(212,gy(F)-5); cx.lineTo(212,gy(F)+5); cx.fill();
+    // Gefahr
+    cx.fillStyle='#142034'; cx.fillRect(16,282,150,6); cx.fillStyle=g>0.6?'#ff4d6a':'#ffb020'; cx.fillRect(16,282,150*Math.min(1,g),6);
+    cx.fillStyle='#8d99a8'; cx.textAlign='left'; cx.fillText('Gefahr',16,276);
+    cx.font='bold 15px ui-monospace,Consolas,monospace'; cx.textAlign='center';
+    var tx=zustand==='bereit'?'HALTEN = SPANNEN':zustand==='pause'?'UNTERBROCHEN':zustand==='tot'?(grund==='rutsch'?'DURCHGERUTSCHT!':'EINGEDRÜCKT!'):'';
+    if(tx){ var w=cx.measureText(tx).width+20; cx.fillStyle='#060b14'; cx.fillRect(105-w/2,236,w,26); cx.strokeStyle='#19e3ff'; cx.lineWidth=2; cx.strokeRect(105-w/2,236,w,26); cx.fillStyle='#19e3ff'; cx.fillText(tx,105,254) }
+  }
+
+  /* ---- Fachfrage nach Verlust der Spannung */
+  var aktuell=-1;
+  function zeigeFrage(meldung){
+    var p=$('panel'); p.style.display='block'; var fb=$('pfb'); fb.textContent=meldung||'';
+    var qi=naechsteFrage();
+    if(qi<0){ $('ptag').textContent='NEUSTART'; $('pq').textContent='Die Fachfragen konnten nicht geladen werden. Du kannst trotzdem neu starten.'; var o=$('po'); o.innerHTML=''; var b=document.createElement('button'); b.className='btn'; b.type='button'; b.textContent='NEUES SPIEL'; b.addEventListener('click',freigeben); o.appendChild(b); return }
+    aktuell=qi; var f=FR[qi]; $('ptag').textContent='FACHFRAGE · RICHTIG BEANTWORTEN ZUM NEUSTART';
+    $('pq').textContent=f.f; var box=$('po'); box.innerHTML='';
+    var reihe=f.o.map(function(x,i){return {t:x,i:i}});
+    for(var j=reihe.length-1;j>0;j--){var k=Math.floor(Math.random()*(j+1)); var tmp=reihe[j]; reihe[j]=reihe[k]; reihe[k]=tmp}
+    reihe.forEach(function(e){ var b=document.createElement('button'); b.type='button'; b.className='opt'; b.textContent=e.t;
+      b.addEventListener('click',function(){ antwort(e.i===f.r) }); box.appendChild(b) });
+  }
+  function antwort(ok){
+    if(zustand!=='tot') return;
+    if(ok){ richtig++; $('kfr').textContent=richtig; freigeben() }
+    else { var a=$('app'); a.classList.remove('shake'); void a.offsetWidth; a.classList.add('shake'); zeigeFrage('Leider falsch. Hier kommt eine neue Frage.') }
+  }
+  function freigeben(){ $('panel').style.display='none'; zustand='bereit'; neu() }
+
+  /* ---- Steuerung: Halten = Spannen */
+  function setze(an){ if(zustand==='tot') return; if(an&&zustand==='bereit') start(); if(zustand==='pause'&&an){ zustand='laeuft'; letztes=0 } halten=an; $('halt').classList.toggle('an',an&&zustand==='laeuft') }
+  var hb=$('halt');
+  hb.addEventListener('pointerdown',function(e){ e.preventDefault(); try{hb.setPointerCapture(e.pointerId)}catch(x){} setze(true) });
+  ['pointerup','pointercancel','lostpointercapture'].forEach(function(n){ hb.addEventListener(n,function(){ setze(false) }) });
+  cv.addEventListener('pointerdown',function(e){ e.preventDefault(); try{cv.setPointerCapture(e.pointerId)}catch(x){} setze(true) });
+  ['pointerup','pointercancel'].forEach(function(n){ cv.addEventListener(n,function(){ setze(false) }) });
+  document.addEventListener('keydown',function(e){ if(e.key===' '||e.key==='ArrowUp'){ e.preventDefault(); if(!e.repeat) setze(true) } });
+  document.addEventListener('keyup',function(e){ if(e.key===' '||e.key==='ArrowUp'){ e.preventDefault(); setze(false) } });
+  document.addEventListener('visibilitychange',function(){ if(document.hidden&&zustand==='laeuft'){ zustand='pause'; halten=false; zeichne() } });
+
+  /* Testhaken fuer Browsertests */
+  window.__spann={zustand:function(){return zustand},punkte:function(){return punkte},kraft:function(){return F},gefahr:function(){return g},grenzen:function(){return [untere(),obere()]},
+    start:start,halten:function(an){setze(an)},schritt:schritt,frage:function(){return aktuell>=0?FR[aktuell]:null},antwort:function(ok){antwort(ok)},
+    zeit:function(){return t},setzeKraft:function(v){F=v}};
+  neu();
+  if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){try{navigator.serviceWorker.register('sw.js')}catch(e){}}
+})();
+</script>
+</body>
+</html>

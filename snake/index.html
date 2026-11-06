@@ -54,8 +54,8 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;border-radius:3px;t
 
   <div class="gesperrt" id="sperre">
     <h2>Gesperrt</h2>
-    <p>Dieses Spiel ist die Belohnung für die Challenge. Löse zuerst die Challenge, dann wird es auf diesem Gerät freigeschaltet.</p>
-    <a class="btn" id="zurch" href="../">ZUR CHALLENGE</a>
+    <p>Dieses Spiel ist die Belohnung für das Arbeitsblatt. Es wird freigeschaltet, sobald du mindestens 80 % der Aufgaben auf der Kontrollseite richtig gelöst hast. <span id="stand"></span></p>
+    <a class="btn" id="zurch" href="../">ZUR KONTROLLE</a>
   </div>
 
   <div id="spiel" style="display:none">
@@ -94,14 +94,18 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;border-radius:3px;t
   var Q=new URLSearchParams(location.search);
   var THEMA=(Q.get('t')||'reihenschaltung').replace(/[^a-z0-9-]/g,'')||'reihenschaltung';
   if(Q.get('s')==='cyber') document.documentElement.className='cyber';
-  var KEY_FREI='ls-frei-'+THEMA, KEY_REK='ls-snake-rekord-'+THEMA;
+  var KEY_REK='ls-snake-rekord-'+THEMA;
   function lies(k){try{return localStorage.getItem(k)}catch(e){return null}}
   function schreib(k,v){try{localStorage.setItem(k,v)}catch(e){}}
   var $=function(i){return document.getElementById(i)};
-  document.getElementById('zurch').href='../'+THEMA+'/';
+  document.getElementById('zurch').href='../'+THEMA+'/kontrolle.html';
 
-  /* ---- Sperre: nur wer die Challenge gelöst hat (Freischaltung im Browser, siehe README der Lehrkraft) */
-  if(!lies(KEY_FREI)){ $('sperre').style.display='block'; if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){try{navigator.serviceWorker.register('sw.js')}catch(e){}} return }
+  /* ---- Sperre: mindestens 80 % der Aufgaben der Kontrollseite richtig gespeichert (ls-fort/ls-plan im Browser) */
+  var PLAN=[],FORT=[]; try{PLAN=JSON.parse(lies('ls-plan-'+THEMA)||'[]');FORT=JSON.parse(lies('ls-fort-'+THEMA)||'[]')}catch(e){}
+  PLAN=Array.isArray(PLAN)?PLAN.map(String):[]; FORT=Array.isArray(FORT)?FORT:[];
+  var GESCHAFFT=PLAN.filter(function(i){return FORT.indexOf(i)>=0}).length, BRAUCHT=Math.floor((PLAN.length*4+4)/5), FREI=PLAN.length>0&&GESCHAFFT>=BRAUCHT;
+  if(!FREI&&$('stand')) $('stand').textContent=PLAN.length?('Bisher '+GESCHAFFT+' von '+PLAN.length+', nötig sind '+BRAUCHT+'.'):'Öffne zuerst die Kontrollseite.';
+  if(!FREI){ $('sperre').style.display='block'; if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){try{navigator.serviceWorker.register('sw.js')}catch(e){}} return }
   $('spiel').style.display='block';
 
   /* ---- Fragen laden */

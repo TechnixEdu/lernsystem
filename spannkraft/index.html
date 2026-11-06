@@ -111,6 +111,8 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;border-radius:8px;t
      Untere Grenze L(t) = Schnittkraft (das Teil rutscht darunter), obere Grenze U(t) = Verformung der Wand (sinkt langsam).
      Ausserhalb des Bands waechst die Gefahr g; bei g >= 1 ist die Spannung verloren. */
   var cv=$('cv'), cx=cv.getContext('2d');
+  // scharf auf jedem Display: Zeichenflaeche in der echten Pixelgroesse der Anzeige (Breite mal Pixeldichte), Zeichnen weiter in 300er Koordinaten
+  function schaerfe(){ var w=cv.clientWidth||300, r=Math.min(4,Math.max(1,w*(window.devicePixelRatio||1)/300)); var n=Math.round(300*r); if(cv.width!==n){ cv.width=n; cv.height=n } cx.setTransform(n/300,0,0,n/300,0,0); if(typeof zeichne==='function'&&zustand!==undefined) zeichne() }
   var zustand='bereit', t=0, F=0, g=0, halten=false, punkte=0, rekord=0, rekDat='', grund='', spitzen=[], naechste=3;
   var r0=lies(KEY_REK); if(r0){ try{var o=JSON.parse(r0); rekord=+o.p||0; rekDat=o.d||''}catch(e){} }
   $('rk').textContent=rekord;
@@ -214,6 +216,7 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;border-radius:8px;t
   window.__spann={zustand:function(){return zustand},punkte:function(){return punkte},kraft:function(){return F},gefahr:function(){return g},grenzen:function(){return [untere(),obere()]},
     start:start,halten:function(an){setze(an)},schritt:schritt,frage:function(){return aktuell>=0?FR[aktuell]:null},antwort:function(ok){antwort(ok)},
     zeit:function(){return t},setzeKraft:function(v){F=v}};
+  schaerfe(); window.addEventListener('resize',schaerfe); window.addEventListener('orientationchange',schaerfe);
   neu();
   if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){try{navigator.serviceWorker.register('sw.js')}catch(e){}}
 })();

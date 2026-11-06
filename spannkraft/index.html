@@ -46,7 +46,7 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;border-radius:8px;t
 </head>
 <body>
 <div class="wrap" id="app">
-  <header><div><h1>Spannkraft-Balance</h1><div class="sub" id="sub">Belohnung · spanne das Werkstück richtig</div></div><div class="stat"><div>PUNKTE <span id="pt">0</span></div><div>REKORD <span id="rk">0</span></div></div></header>
+  <header><div><h1>Spannkraft-Balance</h1><div class="sub" id="sub">Belohnung · spanne das Werkstück richtig</div></div><div class="stat"><div>LEBEN <span id="lb" style="color:var(--bad);letter-spacing:.1em"></span></div><div>PUNKTE <span id="pt">0</span></div><div>REKORD <span id="rk">0</span></div></div></header>
 
   <div class="gesperrt" id="sperre">
     <h2>Gesperrt</h2>
@@ -58,7 +58,7 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;border-radius:8px;t
     <div class="case">
       <canvas id="cv" width="300" height="300" aria-label="Spielfeld"></canvas>
       <button class="halten" type="button" id="halt">SPANNEN (GEDRÜCKT HALTEN)</button>
-      <div class="hint">Halte die Taste gedrückt, dann steigt die Spannkraft, lässt du los, sinkt sie. Bleibe über der <b>orangen Linie</b> (Schnittkraft, das Teil rutscht sonst) und unter der <b>roten Linie</b> (die Wand verformt sich). Der Bereich schwankt und wird mit der Zeit immer enger. Leertaste oder Maus gehen auch.</div>
+      <div class="hint">Halte die Taste gedrückt, dann steigt die Spannkraft, lässt du los, sinkt sie. Bleibe über der <b>orangen Linie</b> (Schnittkraft, das Teil rutscht sonst) und unter der <b>roten Linie</b> (die Wand verformt sich). Der Bereich schwankt und wird mit der Zeit immer enger. Du hast 5 Leben: Erst wenn alle weg sind, kommt eine Fachfrage und das Spiel beginnt wieder von vorn. Leertaste oder Maus gehen auch.</div>
     </div>
 
     <div class="karte" id="karte">
@@ -113,10 +113,11 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;border-radius:8px;t
   var cv=$('cv'), cx=cv.getContext('2d');
   // scharf auf jedem Display: Zeichenflaeche in der echten Pixelgroesse der Anzeige (Breite mal Pixeldichte), Zeichnen weiter in 300er Koordinaten
   function schaerfe(){ var w=cv.clientWidth||300, r=Math.min(4,Math.max(1,w*(window.devicePixelRatio||1)/300)); var n=Math.round(300*r); if(cv.width!==n){ cv.width=n; cv.height=n } cx.setTransform(n/300,0,0,n/300,0,0); if(typeof zeichne==='function'&&zustand!==undefined) zeichne() }
-  var zustand='bereit', t=0, F=0, g=0, halten=false, punkte=0, rekord=0, rekDat='', grund='', spitzen=[], naechste=3;
+  var zustand='bereit', t=0, F=0, g=0, halten=false, punkte=0, rekord=0, rekDat='', grund='', spitzen=[], naechste=3, leben=5, tg=0, pauseT=0;
   var r0=lies(KEY_REK); if(r0){ try{var o=JSON.parse(r0); rekord=+o.p||0; rekDat=o.d||''}catch(e){} }
   $('rk').textContent=rekord;
-  function neu(){ t=0; F=0; g=0; punkte=0; grund=''; spitzen=[]; naechste=3; $('pt').textContent=0; zeichne() }
+  function zeigeLeben(){ var x=''; for(var i=0;i<5;i++) x+=i<leben?'●':'○'; $('lb').textContent=x }
+  function neu(){ t=0; F=0; g=0; punkte=0; grund=''; spitzen=[]; naechste=3; leben=5; tg=0; pauseT=0; $('pt').textContent=0; zeigeLeben(); zeichne() }
   /* Band [L,U]: Mitte schwankt, Breite schrumpft mit der Zeit (46 bis 14), dazu kurze Schnittkraft-Spitzen (L steigt) und Einbrueche der Verformungsgrenze (U sinkt).
      Mindestabstand 8, damit es immer machbar bleibt. */
   function band(){
@@ -125,19 +126,25 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;border-radius:8px;t
     for(var i=0;i<spitzen.length;i++){ var d=t-spitzen[i]; if(d>=0&&d<=0.7){ var e=amp*Math.sin(Math.PI*d/0.7); if(i%2===0) sp=Math.max(sp,e); else dip=Math.max(dip,e*0.8) } }
     L+=sp; U-=dip; if(U-L<8){ var m=(U+L)/2; L=m-4; U=m+4 }
     L=Math.max(L,0); U=Math.min(U,100);
-    return [L*Math.min(1,t/1.5), U];
+    return [L*Math.min(1,(t-tg)/1.5), U];
   }
   function untere(){ return band()[0] }
   function obere(){ return band()[1] }
   function schritt(dt){
     if(zustand!=='laeuft') return;
+    if(pauseT>0){ pauseT-=dt; F=Math.max(0,F-55*dt); zeichne(); return }   // kurze Pause nach verlorenem Leben, Schwierigkeit laeuft nicht weiter
     t+=dt;
     if(t>=naechste){ spitzen.push(naechste); naechste+=Math.max(1.1,2.6-t*0.03)+Math.random()*1.2; if(spitzen.length>6) spitzen.shift() }
     F+=(halten?70:-55)*dt; F=Math.max(0,Math.min(100,F));
     var L=untere(), U=obere(), aussen=(F<L)?-1:(F>U)?1:0;
     if(aussen){ g+=dt/0.9; grund=aussen<0?'rutsch':'zu fest' } else g=Math.max(0,g-dt/0.6);
     var p=Math.floor(t)*10; if(p!==punkte){ punkte=p; $('pt').textContent=punkte }
-    if(g>=1){ ende(); return }
+    if(g>=1){
+      leben--; zeigeLeben();
+      if(leben<=0){ ende(); return }
+      g=0; F=0; tg=t; pauseT=1.0;   // Bereich bleibt wie er ist, nur kurze Einspannphase
+      if(navigator.vibrate){try{navigator.vibrate(60)}catch(e){}}   // naechstes Leben ohne Frage, die Fachfrage kommt erst nach dem letzten
+    }
     zeichne();
   }
   var letztes=0;
@@ -147,8 +154,8 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;border-radius:8px;t
   function ende(){
     zustand='tot'; halten=false; $('halt').classList.remove('an');
     if(punkte>rekord){ rekord=punkte; rekDat=new Date().toLocaleDateString('de-DE'); schreib(KEY_REK,JSON.stringify({p:rekord,d:rekDat})); $('rk').textContent=rekord }
-    $('kti').textContent=(grund==='rutsch'?'WERKSTÜCK DURCHGERUTSCHT':'WAND EINGEDRÜCKT')+' · SPIELSTAND';
-    $('kpt').textContent=punkte; $('ksek').textContent=Math.floor(t); $('krk').textContent=rekord; $('kfr').textContent=richtig;
+    $('kti').textContent='ALLE LEBEN VERLOREN · SPIELSTAND';
+    $('kpt').textContent=punkte; $('ksek').textContent=punkte/10; $('krk').textContent=rekord; $('kfr').textContent=richtig;
     $('kdat').textContent=new Date().toLocaleDateString('de-DE')+' · '+(THEMA.charAt(0).toUpperCase()+THEMA.slice(1));
     $('karte').style.display='block';
     if(navigator.vibrate){try{navigator.vibrate(120)}catch(e){}}
@@ -183,7 +190,7 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;border-radius:8px;t
     cx.fillStyle='#142034'; cx.fillRect(16,282,150,6); cx.fillStyle=g>0.6?'#ff4d6a':'#ffb020'; cx.fillRect(16,282,150*Math.min(1,g),6);
     cx.fillStyle='#8d99a8'; cx.textAlign='left'; cx.fillText('Gefahr',16,276);
     cx.font='bold 15px ui-monospace,Consolas,monospace'; cx.textAlign='center';
-    var tx=zustand==='bereit'?'HALTEN = SPANNEN':zustand==='pause'?'UNTERBROCHEN':zustand==='tot'?(grund==='rutsch'?'DURCHGERUTSCHT!':'EINGEDRÜCKT!'):'';
+    var tx=zustand==='bereit'?'HALTEN = SPANNEN':zustand==='pause'?'UNTERBROCHEN':zustand==='tot'?(grund==='rutsch'?'DURCHGERUTSCHT!':'EINGEDRÜCKT!'):pauseT>0?(grund==='rutsch'?'DURCHGERUTSCHT · LEBEN WEG':'EINGEDRÜCKT · LEBEN WEG'):'';
     if(tx){ var w=cx.measureText(tx).width+20; cx.fillStyle='#060b14'; cx.fillRect(105-w/2,236,w,26); cx.strokeStyle='#19e3ff'; cx.lineWidth=2; cx.strokeRect(105-w/2,236,w,26); cx.fillStyle='#19e3ff'; cx.fillText(tx,105,254) }
   }
 
@@ -221,7 +228,7 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;border-radius:8px;t
   /* Testhaken fuer Browsertests */
   window.__spann={zustand:function(){return zustand},punkte:function(){return punkte},kraft:function(){return F},gefahr:function(){return g},grenzen:function(){return [untere(),obere()]},
     start:start,halten:function(an){setze(an)},schritt:schritt,frage:function(){return aktuell>=0?FR[aktuell]:null},antwort:function(ok){antwort(ok)},
-    zeit:function(){return t},setzeKraft:function(v){F=v}};
+    zeit:function(){return t},leben:function(){return leben},setzeKraft:function(v){F=v}};
   schaerfe(); window.addEventListener('resize',schaerfe); window.addEventListener('orientationchange',schaerfe);
   neu();
   if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){try{navigator.serviceWorker.register('sw.js')}catch(e){}}

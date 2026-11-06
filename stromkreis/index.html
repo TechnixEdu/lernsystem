@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070b12">
+<title>Stromkreis schließen</title>
+<style>
+:root{--bg:#070b12;--panel:#0e1623;--line:#1f3050;--text:#dbe7f5;--dim:#7f93ad;--a:#19e3ff;--a2:#0a8aa0;--ok:#2dff9a;--bad:#ff4d6a;--warn:#ffb020;--glow:25,227,255}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{min-height:100vh;background:radial-gradient(900px 420px at 50% -120px,rgba(var(--glow),.13),transparent 70%),linear-gradient(rgba(25,227,255,.035) 1px,transparent 1px) 0 0/100% 28px,var(--bg);padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
+.wrap{max-width:420px;margin:0 auto}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+h1{font-size:15px;letter-spacing:.22em;text-transform:uppercase;margin:0;color:var(--a);font-weight:700}
+.sub{font-size:12px;color:var(--dim);margin-top:3px}
+.stat{font:700 11px ui-monospace,Consolas,monospace;letter-spacing:.12em;color:var(--warn);text-align:right;line-height:1.6;white-space:nowrap}
+.case{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px}
+.aufg{font-size:14px;line-height:1.45;margin:0 0 10px;min-height:2.9em}
+canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;border-radius:8px;touch-action:manipulation;background:#060b14;border:1px solid var(--a2)}
+.opts{display:grid;gap:8px;margin-top:10px}
+.opts.reihe{grid-template-columns:repeat(3,1fr)}
+.opt{appearance:none;text-align:left;border:1px solid var(--a2);background:rgba(0,0,0,.35);color:var(--text);font:inherit;font-size:14px;line-height:1.4;padding:11px 12px;border-radius:10px;cursor:pointer;min-height:44px}
+.opt:active{background:rgba(var(--glow),.2)}
+.opt.teil{text-align:center;font:700 14px ui-monospace,Consolas,monospace;padding:12px 4px}
+.opt.benutzt{border-color:var(--a);background:rgba(var(--glow),.22);color:var(--a)}
+.opt.richtig{border-color:var(--ok);background:rgba(45,255,154,.16)}
+.opt.falsch{border-color:var(--bad);background:rgba(255,77,106,.16)}
+.opt[disabled]{cursor:default}
+.btn{appearance:none;border:1px solid var(--a);background:rgba(var(--glow),.12);color:var(--a);font:700 13px ui-monospace,Consolas,monospace;letter-spacing:.16em;padding:13px 18px;border-radius:10px;cursor:pointer;box-shadow:0 0 16px rgba(var(--glow),.22)}
+.btn[disabled]{opacity:.35;box-shadow:none;cursor:default}
+.btn.voll{display:block;width:100%;margin-top:10px}
+.fb{margin-top:10px;font-size:13.5px;line-height:1.45;color:var(--warn);min-height:2.9em}
+.fb.ok{color:var(--ok)}
+.panel{display:none;margin-top:10px;background:var(--panel);border:1px solid var(--a2);border-radius:14px;padding:14px}
+.panel .tag{font:700 11px ui-monospace,Consolas,monospace;letter-spacing:.14em;color:var(--a);margin-bottom:6px}
+.panel .q{font-size:14.5px;line-height:1.5;margin-bottom:10px}
+.panel .opts{margin-top:0}
+.panel .fb2{margin-top:10px;font-size:13.5px;line-height:1.45;color:var(--warn);min-height:1em}
+.karte{display:none;margin-top:10px;border:1px solid var(--ok);border-radius:14px;padding:14px;text-align:center;background:radial-gradient(circle at 50% 0,rgba(53,255,160,.15),transparent 70%)}
+.karte .ti{font:700 11px ui-monospace,Consolas,monospace;letter-spacing:.2em;color:var(--ok)}
+.karte .pt{font:700 40px ui-monospace,Consolas,monospace;color:var(--text);margin:4px 0}
+.karte .zl{font:13px ui-monospace,Consolas,monospace;color:var(--text);line-height:1.7}
+.karte .zl b{color:var(--ok)}
+.karte .sh{margin-top:6px;font-size:12px;color:var(--dim)}
+.gesperrt{display:none;text-align:center;background:var(--panel);border:1px solid var(--a2);border-radius:16px;padding:22px 16px}
+.gesperrt h2{margin:0 0 8px;font-size:16px;letter-spacing:.16em;color:var(--a);text-transform:uppercase}
+.gesperrt p{margin:0 0 14px;font-size:14px;line-height:1.5}
+.gesperrt a{display:inline-block;text-decoration:none}
+.foot{margin-top:14px;font-size:11.5px;color:var(--dim);text-align:center;line-height:1.5}
+.shake{animation:sh .4s}
+@keyframes sh{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header><div><h1>Stromkreis schließen</h1><div class="sub" id="sub">Belohnung · baue und prüfe Reihenschaltungen</div></div><div class="stat"><div>LEBEN <span id="lb" style="color:var(--bad);letter-spacing:.1em"></span></div><div>PUNKTE <span id="pt">0</span></div><div>REKORD <span id="rk">0</span></div></div></header>
+
+  <div class="gesperrt" id="sperre">
+    <h2>Gesperrt</h2>
+    <p>Dieses Spiel ist die Belohnung für das Arbeitsblatt. Es wird freigeschaltet, sobald du mindestens 80 % der Aufgaben auf der Kontrollseite richtig gelöst hast. <span id="stand"></span></p>
+    <a class="btn" id="zurch" href="../">ZUR KONTROLLE</a>
+  </div>
+
+  <div id="spiel" style="display:none">
+    <div class="case">
+      <p class="aufg" id="aufg">Tippe auf START. Du bekommst Stromkreise mit Aufgaben, die Zeit läuft. Du hast 5 Leben.</p>
+      <canvas id="cv" width="300" height="300" aria-label="Schaltbild"></canvas>
+      <div class="opts" id="opts"></div>
+      <button class="btn voll" type="button" id="aktion">START</button>
+      <div class="fb" id="fb" aria-live="polite"></div>
+    </div>
+
+    <div class="karte" id="karte">
+      <div class="ti" id="kti">ALLE LEBEN VERLOREN · SPIELSTAND</div>
+      <div class="pt" id="kpt">0</div>
+      <div class="zl">Runden gelöst: <b id="krd">0</b><br>Rekord auf diesem Gerät: <b id="krk">0</b><br>Fachfragen richtig: <b id="kfr">0</b><br><span id="kdat"></span></div>
+      <div class="sh">Zum Vorzeigen: Screenshot machen.</div>
+    </div>
+
+    <div class="panel" id="panel">
+      <div class="tag" id="ptag">FACHFRAGE</div>
+      <div class="q" id="pq"></div>
+      <div class="opts" id="po"></div>
+      <div class="fb2" id="pfb" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <p class="foot">Funktioniert ohne Internet, sobald die Seite einmal geladen wurde.<br>Das Spiel ist freiwillig. Der Rekord wird nur auf diesem Gerät gespeichert.<br><a href="https://technixedu.de/datenschutz.html" style="color:inherit">Datenschutz</a></p>
+</div>
+<script>
+(function(){
+  'use strict';
+  var Q=new URLSearchParams(location.search);
+  var THEMA=(Q.get('t')||'reihenschaltung').replace(/[^a-z0-9-]/g,'')||'reihenschaltung';
+  var KEY_REK='ls-strom-rekord-'+THEMA;
+  function lies(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function schreib(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  var $=function(i){return document.getElementById(i)};
+  $('zurch').href='../'+THEMA+'/kontrolle.html';
+
+  /* ---- Sperre: mindestens 80 % der Aufgaben der Kontrollseite richtig gespeichert (ls-fort/ls-plan im Browser) */
+  var PLAN=[],FORT=[]; try{PLAN=JSON.parse(lies('ls-plan-'+THEMA)||'[]');FORT=JSON.parse(lies('ls-fort-'+THEMA)||'[]')}catch(e){}
+  PLAN=Array.isArray(PLAN)?PLAN.map(String):[]; FORT=Array.isArray(FORT)?FORT:[];
+  var GESCHAFFT=PLAN.filter(function(i){return FORT.indexOf(i)>=0}).length, BRAUCHT=Math.floor((PLAN.length*4+4)/5), FREI=PLAN.length>0&&GESCHAFFT>=BRAUCHT;
+  if(!FREI&&$('stand')) $('stand').textContent=PLAN.length?('Bisher '+GESCHAFFT+' von '+PLAN.length+', nötig sind '+BRAUCHT+'.'):'Öffne zuerst die Kontrollseite.';
+  if(!FREI){ $('sperre').style.display='block'; if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){try{navigator.serviceWorker.register('sw.js')}catch(e){}} return }
+  $('spiel').style.display='block';
+
+  /* ---- Fachfragen laden */
+  var FR=[], bag=[], letzte=-1, richtigFr=0;
+  var sc=document.createElement('script'); sc.src='fragen_'+THEMA+'.js'; sc.onload=function(){FR=window.FRAGEN||[]}; sc.onerror=function(){FR=[]}; document.head.appendChild(sc);
+  function naechsteFrage(){
+    if(!FR.length) return -1;
+    if(!bag.length){ for(var i=0;i<FR.length;i++) bag.push(i); mische(bag);
+      if(bag.length>1 && bag[bag.length-1]===letzte){ var x=bag.pop(); bag.unshift(x) } }
+    letzte=bag.pop(); return letzte;
+  }
+
+  /* ---- Hilfen */
+  function rnd(n){return Math.floor(Math.random()*n)}
+  function mische(a){ for(var j=a.length-1;j>0;j--){var k=rnd(j+1); var t=a[j]; a[j]=a[k]; a[k]=t} return a }
+  function fmt(v){ return String(Math.round(v*100)/100).replace('.',',') }
+  function ohm(v){ return v>=1000?fmt(v/1000)+' kΩ':fmt(v)+' Ω' }
+  function summe(a){ var s=0; for(var i=0;i<a.length;i++) s+=a[i]; return s }
+
+  /* ---- Zustand */
+  var cv=$('cv'), cx=cv.getContext('2d');
+  var zustand='bereit', leben=5, punkte=0, rekord=0, runde=0, geloest=0, R=null, rest=0, fbOk=false, fbT=0, letzterTyp='', zeitT=0, banner='';
+  var r0=lies(KEY_REK); if(r0){ try{var o=JSON.parse(r0); rekord=+o.p||0}catch(e){} }
+  $('rk').textContent=rekord;
+  function zeigeLeben(){ var x=''; for(var i=0;i<5;i++) x+=i<leben?'●':'○'; $('lb').textContent=x }
+
+  /* ---- Farben und Geometrie (Zeichenflaeche 300 x 300) */
+  var C={bg:'#060b14',lei:'#7f93ad',komp:'#aab4bf',rand:'#19e3ff',txt:'#dbe7f5',dim:'#8d99a8',ok:'#2dff9a',bad:'#ff4d6a',warn:'#ffb020'};
+  var X0=30,X1=270,YT=105,YB=215;
+  function slotX(i,n){ return X0+(i+0.5)*(X1-X0)/n }
+  function schaerfe(){ var w=cv.clientWidth||300, r=Math.min(4,Math.max(1,w*(window.devicePixelRatio||1)/300)); var n=Math.round(300*r); if(cv.width!==n){ cv.width=n; cv.height=n } cx.setTransform(n/300,0,0,n/300,0,0); zeichne() }
+
+  /* ---- Rundenerzeugung ---- */
+  var POOL=[47,68,100,150,220,330,470,680,1000];
+  function rundeA(){
+    var n=runde<3?2:runde<7?3:4;
+    var lsg=mische(POOL.slice()).slice(0,n), ziel=summe(lsg);
+    var rest2=POOL.filter(function(v){return lsg.indexOf(v)<0}); mische(rest2);
+    var teile=lsg.concat(rest2.slice(0,2));
+    if(runde>=2&&rnd(2)) teile[teile.length-1]='offen';
+    mische(teile);
+    return {typ:'A',n:n,ziel:ziel,teile:teile,slots:[],zeit:Math.max(16,36-runde*1.3),
+      aufg:'Baue eine Reihenschaltung mit einem Gesamtwiderstand von '+ohm(ziel)+'. Tippe die Teile an, sie füllen die freien Plätze von links. Tippe ein verbautes Teil noch einmal an, um es zu entfernen.',
+      lsg:lsg.slice().sort(function(a,b){return a-b}).join(' + ')+' = '+fmt(ziel)+' Ω'}
+  }
+  function rundeB(){
+    var P=[[1,2],[1,3],[1,4],[2,3],[1,1],[3,2]], p=P[rnd(P.length)], a=p[0], b=p[1];
+    var k=[100,200,300,500,1000][rnd(5)]; var R1=a*k, R2=b*k;
+    var m=[2,3,4,5][rnd(4)]; var U=(a+b)*m; if(U<6) U=(a+b)*m*2;
+    var m2=U/(a+b), U2=b*m2, U1=a*m2;
+    var o=[U2]; [U1,U/2,U].forEach(function(v){ if(o.indexOf(v)<0) o.push(v) });
+    var ex=[U2+2,U2-2,U2*2,U1+U2/2,U-1]; for(var i=0;o.length<4&&i<ex.length;i++) if(ex[i]>0&&ex[i]<U&&o.indexOf(ex[i])<0) o.push(ex[i]);
+    return {typ:'B',U:U,R1:R1,R2:R2,wert:o.map(function(v){return fmt(v)+' V'}),richtig:0,zeit:Math.max(10,21-runde*0.7),
+      aufg:'Zwei Widerstände in Reihe an '+fmt(U)+' V. Welche Spannung liegt an R₂?',
+      lsg:'Die Spannungen verhalten sich wie die Widerstände ('+ohm(R1)+' : '+ohm(R2)+' = '+a+' : '+b+'). U₂ = '+fmt(U)+' V · '+b+'/'+(a+b)+' = '+fmt(U2)+' V.'}
+  }
+  var BAUTEILE=[{n:'S1',k:'S',l:'S1 Not-Aus-Schalter'},{n:'S2',k:'S',l:'S2 Türschalter'},{n:'F1',k:'F',l:'F1 Sicherung'},{n:'H1',k:'L',l:'H1 Meldeleuchte'},{n:'K1',k:'K',l:'K1 Schützspule'},{n:'S3',k:'S',l:'S3 Starttaster'}];
+  function rundeC(){
+    var n=runde<5?3:4, b=mische(BAUTEILE.slice()).slice(0,n), d=rnd(n), U=[12,24][rnd(2)];
+    return {typ:'C',U:U,b:b,def:d,richtig:d,zeit:Math.max(8,15-runde*0.5),reihenfolge:b.map(function(x){return x.l}),
+      aufg:'Die Anlage läuft nicht. Ein Bauteil ist unterbrochen. Die Messwerte an den Bauteilen stehen im Bild. Welches ist defekt?',
+      lsg:'Am unterbrochenen Bauteil liegt die volle Spannung ('+U+' V), an allen anderen 0 V, weil im unterbrochenen Kreis kein Strom fließt. Defekt: '+b[d].n+'.'}
+  }
+  function rundeD(){
+    var Rg=[240,300,400,600,800,1200][rnd(6)], U=[12,24][rnd(2)];
+    var S=[[2,3,5],[1,4,5],[2,2,6],[3,3,4]][rnd(4)]; mische(S);
+    var Rs=S.map(function(x){return Rg*x/10}); var I=U/Rg*1000;
+    var v=[fmt(I)+' mA','weniger als '+fmt(I)+' mA, weil die Widerstände Strom verbrauchen','mehr als '+fmt(I)+' mA, weil sich die Ströme addieren','0 mA'];
+    return {typ:'D',U:U,Rs:Rs,I:I,wert:v,richtig:0,zeit:Math.max(8,13-runde*0.4),
+      aufg:'Das Amperemeter A₁ zeigt '+fmt(I)+' mA. Was zeigt das Amperemeter A₂ am anderen Ende des Kreises?',
+      lsg:'In der Reihenschaltung hat der Strom nur einen Weg: Er ist an jeder Stelle gleich groß, auch hinter den Widerständen. Nur die Spannung wird aufgeteilt.'}
+  }
+  function neueRunde(){
+    runde++; var typ;
+    if(runde===1) typ='A'; else { do{ typ='ABCD'.charAt(rnd(4)) }while(typ===letzterTyp) }
+    letzterTyp=typ; R=typ==='A'?rundeA():typ==='B'?rundeB():typ==='C'?rundeC():rundeD();
+    rest=R.zeit; zustand='runde'; fbOk=false; banner='';
+    $('aufg').textContent=R.aufg; $('fb').textContent=''; $('fb').className='fb';
+    baueOptionen(); zeichne();
+  }
+  function baueOptionen(){
+    var box=$('opts'); box.innerHTML=''; box.className='opts'; var ak=$('aktion');
+    if(R.typ==='A'){
+      box.className='opts reihe'; ak.textContent='EINSCHALTEN'; ak.disabled=true; ak.style.display='block';
+      R.teile.forEach(function(t,i){ var b=document.createElement('button'); b.type='button'; b.className='opt teil'; b.id='teil'+i; b.textContent=(t==='offen')?'Schalter offen':ohm(t);
+        b.addEventListener('click',function(){ teilTippen(i) }); box.appendChild(b) });
+    } else {
+      ak.style.display='none';
+      var texte=R.typ==='C'?R.reihenfolge:R.wert, idx=texte.map(function(x,i){return i});
+      mische(idx);
+      idx.forEach(function(i){ var b=document.createElement('button'); b.type='button'; b.className='opt'; b.textContent=texte[i]; b.dataset.i=i;
+        b.addEventListener('click',function(){ auswahl(i,b) }); box.appendChild(b) });
+    }
+  }
+  function teilTippen(i){
+    if(zustand!=='runde'||R.typ!=='A') return;
+    var p=R.slots.indexOf(i);
+    if(p>=0) R.slots.splice(p,1); else if(R.slots.length<R.n) R.slots.push(i);
+    for(var j=0;j<R.teile.length;j++){ var b=$('teil'+j); if(b) b.classList.toggle('benutzt',R.slots.indexOf(j)>=0) }
+    $('aktion').disabled=R.slots.length<R.n; zeichne();
+  }
+  function auswahl(i,b){
+    if(zustand!=='runde'||R.typ==='A') return;
+    var ok=(i===R.richtig);
+    var bs=$('opts').children; for(var j=0;j<bs.length;j++){ bs[j].disabled=true; if(+bs[j].dataset.i===R.richtig) bs[j].classList.add('richtig') }
+    if(!ok) b.classList.add('falsch');
+    ergebnis(ok,R.lsg);
+  }
+  function einschalten(){
+    if(zustand!=='runde'||R.typ!=='A'||R.slots.length<R.n) return;
+    var tl=R.slots.map(function(i){return R.teile[i]});
+    var bs=$('opts').children; for(var j=0;j<bs.length;j++) bs[j].disabled=true;
+    if(tl.indexOf('offen')>=0){ ergebnis(false,'Der offene Schalter unterbricht den Kreis, es fließt kein Strom. Richtig wäre: '+R.lsg+'.'); return }
+    var s=summe(tl);
+    if(s===R.ziel) ergebnis(true,'Stimmt: '+tl.slice().sort(function(a,b){return a-b}).join(' + ')+' = '+fmt(s)+' Ω. In der Reihenschaltung addieren sich die Widerstände.');
+    else ergebnis(false,'Dein Kreis hat '+fmt(s)+' Ω, gefordert sind '+fmt(R.ziel)+' Ω. Eine mögliche Lösung: '+R.lsg+'.');
+  }
+  function ergebnis(ok,text){
+    zustand='fb'; fbOk=ok; fbT=0; $('aktion').style.display='block'; $('aktion').disabled=false; $('aktion').textContent='WEITER';
+    if(ok){ var pk=100+Math.ceil(rest*5); punkte+=pk; geloest++; banner='RICHTIG +'+pk; $('pt').textContent=punkte; $('fb').className='fb ok' }
+    else { leben--; zeigeLeben(); banner=(rest<=0?'ZEIT ABGELAUFEN':'FALSCH')+' · LEBEN WEG'; $('fb').className='fb'; if(navigator.vibrate){try{navigator.vibrate(60)}catch(e){}}
+      var a=$('app'); a.classList.remove('shake'); void a.offsetWidth; a.classList.add('shake') }
+    $('fb').textContent=text; zeichne();
+  }
+  function weiter(){
+    if(zustand!=='fb') return;
+    if(leben<=0) ende(); else neueRunde();
+  }
+  $('aktion').addEventListener('click',function(){
+    if(zustand==='bereit') { neu(); neueRunde() }
+    else if(zustand==='fb') weiter();
+    else if(zustand==='runde') einschalten();
+  });
+
+  /* ---- Ablauf */
+  function neu(){ leben=5; punkte=0; runde=0; geloest=0; letzterTyp=''; $('pt').textContent=0; zeigeLeben(); $('karte').style.display='none'; $('panel').style.display='none' }
+  var letztes=0;
+  function schritt(dt){
+    zeitT+=dt;
+    if(zustand==='runde'){
+      rest-=dt;
+      if(rest<=0){ rest=0; var bs=$('opts').children; for(var j=0;j<bs.length;j++){ bs[j].disabled=true; if(R.typ==='C'||R.typ==='B'||R.typ==='D'){ if(+bs[j].dataset.i===R.richtig) bs[j].classList.add('richtig') } }
+        ergebnis(false,'Die Zeit ist abgelaufen. '+(R.typ==='A'?'Eine mögliche Lösung: '+R.lsg+'.':R.lsg)) }
+    } else if(zustand==='fb'){ fbT+=dt; if(fbT>=(fbOk?3.2:5.5)) weiter() }
+    if(zustand!=='bereit'&&zustand!=='tot') zeichne(); else if(zustand==='fb') zeichne();
+  }
+  function lauf(ts){ var dt=letztes?Math.min(0.05,(ts-letztes)/1000):0.016; letztes=ts; if(zustand==='runde'||zustand==='fb'){ schritt(dt) } requestAnimationFrame(lauf) }
+  requestAnimationFrame(lauf);
+  function ende(){
+    zustand='tot'; $('opts').innerHTML=''; $('aktion').style.display='none';
+    if(punkte>rekord){ rekord=punkte; schreib(KEY_REK,JSON.stringify({p:rekord,d:new Date().toLocaleDateString('de-DE')})); $('rk').textContent=rekord }
+    $('kpt').textContent=punkte; $('krd').textContent=geloest; $('krk').textContent=rekord; $('kfr').textContent=richtigFr;
+    $('kdat').textContent=new Date().toLocaleDateString('de-DE')+' · '+(THEMA.charAt(0).toUpperCase()+THEMA.slice(1));
+    $('karte').style.display='block'; $('aufg').textContent='Alle Leben verloren. Beantworte die Fachfrage, dann beginnt ein neues Spiel.'; $('fb').textContent='';
+    zeichne(); zeigeFrage('');
+  }
+
+  /* ---- Zeichnen ---- */
+  function linie(x1,y1,x2,y2,f,w){ cx.strokeStyle=f||C.lei; cx.lineWidth=w||2; cx.beginPath(); cx.moveTo(x1,y1); cx.lineTo(x2,y2); cx.stroke() }
+  function text(s,x,y,f,gr,al){ cx.font=(gr||11)+'px ui-monospace,Consolas,monospace'; cx.textAlign=al||'center'; cx.fillStyle=f||C.dim; cx.fillText(s,x,y) }
+  function schleife(Utext,ohneBatt){
+    cx.strokeStyle=C.lei; cx.lineWidth=2; cx.beginPath(); cx.moveTo(145,YB); cx.lineTo(X0,YB); cx.lineTo(X0,YT); cx.lineTo(X1,YT); cx.lineTo(X1,YB); cx.lineTo(155,YB); cx.stroke();
+    linie(145,YB-12,145,YB+12,C.txt,2); linie(155,YB-6,155,YB+6,C.txt,4);
+    text('+',137,YB-8,C.txt,12); text(Utext,150,YB+30,C.warn,12);
+  }
+  function komp(k,x,y,farbe,offen,beschr){
+    cx.fillStyle=C.bg; cx.strokeStyle=farbe||C.komp; cx.lineWidth=1.8;
+    if(k==='R'||k==='K'){ cx.fillRect(x-18,y-8,36,16); cx.strokeRect(x-18,y-8,36,16); if(k==='K') text('K',x,y+4,farbe||C.komp,11) }
+    else if(k==='F'){ cx.fillRect(x-18,y-6,36,12); cx.strokeRect(x-18,y-6,36,12); if(offen){ linie(x-14,y,x-3,y,farbe||C.komp,1.2); linie(x+3,y,x+14,y,farbe||C.komp,1.2) } else linie(x-14,y,x+14,y,farbe||C.komp,1.2) }
+    else if(k==='L'){ cx.fillRect(x-18,y-12,36,24); linie(x-18,y,x-11,y,C.lei,2); linie(x+11,y,x+18,y,C.lei,2); cx.strokeStyle=farbe||C.komp; cx.beginPath(); cx.arc(x,y,11,0,7); cx.stroke(); linie(x-7.8,y-7.8,x+7.8,y+7.8,farbe||C.komp,1.5); linie(x-7.8,y+7.8,x+7.8,y-7.8,farbe||C.komp,1.5) }
+    else if(k==='S'){ cx.fillRect(x-18,y-12,36,24); linie(x-18,y,x-12,y,C.lei,2); linie(x+12,y,x+18,y,C.lei,2);
+      cx.strokeStyle=farbe||C.komp; cx.lineWidth=1.8; cx.beginPath(); cx.arc(x-12,y,2,0,7); cx.stroke(); cx.beginPath(); cx.arc(x+12,y,2,0,7); cx.stroke();
+      linie(x-12,y,offen?x+8:x+12,offen?y-11:y,farbe||C.komp,1.8) }
+    if(beschr) text(beschr,x,y-14,C.dim,10)
+  }
+  function zeichne(){
+    cx.fillStyle=C.bg; cx.fillRect(0,0,300,300);
+    if(zustand==='bereit'||!R){ schleife('U = 12 V'); komp('R',90,YT,C.komp,0,'R₁'); komp('R',150,YT,C.komp,0,'R₂'); komp('S',210,YT,C.komp,0,'S'); text('STROMKREIS SCHLIESSEN',150,50,C.rand,14); text('Tippe auf START',150,72,C.dim,12); return }
+    if(R.typ==='A') zeichneA(); else if(R.typ==='B') zeichneB(); else if(R.typ==='C') zeichneC(); else zeichneD();
+    if(zustand==='runde'||zustand==='fb') zeitleiste();
+    if(banner){ var w=cx.measureText(banner).width; cx.font='bold 14px ui-monospace,Consolas,monospace'; w=cx.measureText(banner).width+20; cx.fillStyle=C.bg; cx.fillRect(150-w/2,150,w,28); cx.strokeStyle=fbOk?C.ok:C.bad; cx.lineWidth=2; cx.strokeRect(150-w/2,150,w,28); cx.fillStyle=fbOk?C.ok:C.bad; cx.textAlign='center'; cx.fillText(banner,150,169) }
+    if(zustand==='fb'&&fbOk) strom();
+  }
+  function zeitleiste(){
+    var f=Math.max(0,Math.min(1,rest/R.zeit));
+    cx.fillStyle='#142034'; cx.fillRect(X0,270,X1-X0,6); cx.fillStyle=f<0.3?C.bad:C.warn; cx.fillRect(X0,270,(X1-X0)*f,6); text('Zeit',X0,266,C.dim,10,'left');
+    text('Runde '+runde,X1,266,C.dim,10,'right');
+  }
+  function strom(){
+    var P=2*((X1-X0)+(YB-YT)); for(var i=0;i<10;i++){ var s=((zeitT*70)+i*P/10)%P, x,y;
+      if(s<X1-X0){ x=X0+s; y=YT } else if(s<(X1-X0)+(YB-YT)){ x=X1; y=YT+(s-(X1-X0)) } else if(s<2*(X1-X0)+(YB-YT)){ x=X1-(s-(X1-X0)-(YB-YT)); y=YB } else { x=X0; y=YB-(s-2*(X1-X0)-(YB-YT)) }
+      if(y===YB&&x>143&&x<157) continue; cx.fillStyle=C.ok; cx.beginPath(); cx.arc(x,y,3,0,7); cx.fill() }
+  }
+  function zeichneA(){
+    schleife('Quelle');
+    text('ZIEL: R = '+ohm(R.ziel),150,52,C.warn,15);
+    for(var i=0;i<R.n;i++){ var x=slotX(i,R.n), si=R.slots[i];
+      if(si===undefined){ cx.setLineDash([3,3]); cx.strokeStyle=C.dim; cx.lineWidth=1.2; cx.fillStyle=C.bg; cx.fillRect(x-17,YT-9,34,18); cx.strokeRect(x-17,YT-9,34,18); cx.setLineDash([]); text(String(i+1),x,YT+4,C.dim,11) }
+      else { var t=R.teile[si]; if(t==='offen') komp('S',x,YT,fbOk||zustand!=='fb'?C.komp:C.bad,1,''); else { komp('R',x,YT,C.komp,0,''); text(String(t>=1000?(t/1000)+'k':t),x,YT+3,C.txt,9) } }
+    }
+  }
+  function zeichneB(){
+    schleife('U = '+fmt(R.U)+' V');
+    komp('R',100,YT,C.komp,0,'R₁'); komp('R',200,YT,C.komp,0,'R₂');
+    text(ohm(R.R1),100,YT+26,C.txt,11); text(ohm(R.R2),200,YT+26,C.txt,11);
+    linie(182,YT+36,218,YT+36,C.warn,1.5); linie(182,YT+32,182,YT+40,C.warn,1.5); linie(218,YT+32,218,YT+40,C.warn,1.5);
+    text('U₂ = ?',200,YT+54,C.warn,13);
+    text('U = '+fmt(R.U)+' V gesamt',150,60,C.rand,14);
+  }
+  function zeichneC(){
+    schleife('U = '+R.U+' V'); var n=R.b.length;
+    for(var i=0;i<n;i++){ var x=slotX(i,n), b=R.b[i], d=(i===R.def);
+      var f=(zustand==='fb'&&d)?C.bad:C.komp; komp(b.k,x,YT,f,d,b.n);
+      var mw=d?R.U+' V':'0 V'; var bx=x-20; cx.strokeStyle=C.rand; cx.lineWidth=1.2; cx.strokeRect(bx,YT+26,40,18); text(mw,x,YT+39,d?C.warn:C.txt,12); text('V',x,YT+56,C.dim,10) }
+    text('Spannungsmessung an jedem Bauteil',150,60,C.dim,11);
+  }
+  function zeichneD(){
+    schleife('U = '+R.U+' V');
+    for(var i=0;i<3;i++){ var x=100+i*50; komp('R',x,YT,C.komp,0,'R'+(i+1)); text(ohm(R.Rs[i]),x,YT+26,C.txt,10) }
+    function amp(x,y,lab,wert,al){ var dx=al==='left'?20:-20; cx.fillStyle=C.bg; cx.strokeStyle=C.rand; cx.lineWidth=1.8; cx.beginPath(); cx.arc(x,y,13,0,7); cx.fill(); cx.stroke(); text('A',x,y+4,C.rand,13); text(lab,x+dx,y-4,C.dim,11,al); text(wert,x+dx,y+12,C.warn,12,al) }
+    amp(X0,160,'A₁',fmt(R.I)+' mA','left'); amp(X1,160,'A₂','?','right');
+    text('Gleiche Quelle, drei Widerstände in Reihe',150,60,C.dim,11);
+  }
+
+  /* ---- Fachfrage nach dem letzten Leben */
+  var aktuell=-1;
+  function zeigeFrage(meldung){
+    var p=$('panel'); p.style.display='block'; $('pfb').textContent=meldung||'';
+    var qi=naechsteFrage(), box=$('po'); box.innerHTML='';
+    if(qi<0){ $('ptag').textContent='NEUSTART'; $('pq').textContent='Die Fachfragen konnten nicht geladen werden. Du kannst trotzdem neu starten.'; var b0=document.createElement('button'); b0.className='btn'; b0.type='button'; b0.textContent='NEUES SPIEL'; b0.addEventListener('click',freigeben); box.appendChild(b0); return }
+    aktuell=qi; var f=FR[qi]; $('ptag').textContent='FACHFRAGE · RICHTIG BEANTWORTEN ZUM NEUSTART'; $('pq').textContent=f.f;
+    var reihe=f.o.map(function(x,i){return {t:x,i:i}}); mische(reihe);
+    reihe.forEach(function(e){ var b=document.createElement('button'); b.type='button'; b.className='opt'; b.textContent=e.t; b.addEventListener('click',function(){ antwortFr(e.i===f.r) }); box.appendChild(b) });
+  }
+  function antwortFr(ok){
+    if(zustand!=='tot') return;
+    if(ok){ richtigFr++; $('kfr').textContent=richtigFr; freigeben() }
+    else { var a=$('app'); a.classList.remove('shake'); void a.offsetWidth; a.classList.add('shake'); zeigeFrage('Leider falsch. Hier kommt eine neue Frage.') }
+  }
+  function freigeben(){ $('panel').style.display='none'; $('karte').style.display='none'; zustand='bereit'; R=null; leben=5; punkte=0; runde=0; geloest=0; $('pt').textContent=0; zeigeLeben();
+    $('aufg').textContent='Tippe auf START für ein neues Spiel.'; $('opts').innerHTML=''; var ak=$('aktion'); ak.style.display='block'; ak.disabled=false; ak.textContent='START'; $('fb').textContent=''; zeichne() }
+
+  /* Testhaken fuer Browsertests */
+  window.__sk={zustand:function(){return zustand},punkte:function(){return punkte},leben:function(){return leben},runde:function(){return R},rundenNr:function(){return runde},rest:function(){return rest},
+    schritt:schritt,frage:function(){return aktuell>=0?FR[aktuell]:null},antwortFr:antwortFr,
+    loese:function(){ if(zustand!=='runde') return false;
+      if(R.typ==='A'){ R.slots=[]; var rest3=R.teile.map(function(t,i){return i}); var wahl=[]; (function f(k,s,start,ids){ if(wahl.length) return; if(ids.length===R.n){ if(s===R.ziel) wahl=ids.slice(); return } for(var i=start;i<R.teile.length;i++){ if(R.teile[i]==='offen') continue; ids.push(i); f(k+1,s+R.teile[i],i+1,ids); ids.pop() } })(0,0,0,[]);
+        wahl.forEach(function(i){ teilTippen(i) }); einschalten(); return true }
+      var bs=$('opts').children; for(var j=0;j<bs.length;j++) if(+bs[j].dataset.i===R.richtig){ bs[j].click(); return true } return false },
+    falsch:function(){ if(zustand!=='runde') return false;
+      if(R.typ==='A'){ R.slots=[]; for(var i=0;i<R.teile.length&&R.slots.length<R.n;i++) if(R.teile[i]==='offen') teilTippen(i); for(var i2=0;i2<R.teile.length&&R.slots.length<R.n;i2++) if(R.slots.indexOf(i2)<0) teilTippen(i2); einschalten(); return true }
+      var bs=$('opts').children; for(var j=0;j<bs.length;j++) if(+bs[j].dataset.i!==R.richtig){ bs[j].click(); return true } return false },
+    weiter:weiter};
+  zeigeLeben(); schaerfe(); window.addEventListener('resize',schaerfe); window.addEventListener('orientationchange',schaerfe);
+  if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){try{navigator.serviceWorker.register('sw.js')}catch(e){}}
+})();
+</script>
+</body>
+</html>

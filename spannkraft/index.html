@@ -58,7 +58,7 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;border-radius:8px;t
     <div class="case">
       <canvas id="cv" width="300" height="300" aria-label="Spielfeld"></canvas>
       <button class="halten" type="button" id="halt">SPANNEN (GEDRÜCKT HALTEN)</button>
-      <div class="hint">Halte die Taste gedrückt, dann steigt die Spannkraft, lässt du los, sinkt sie. Bleibe über der <b>orangen Linie</b> (Schnittkraft, das Teil rutscht sonst) und unter der <b>roten Linie</b> (die Wand verformt sich). Leertaste oder Maus gehen auch.</div>
+      <div class="hint">Halte die Taste gedrückt, dann steigt die Spannkraft, lässt du los, sinkt sie. Bleibe über der <b>orangen Linie</b> (Schnittkraft, das Teil rutscht sonst) und unter der <b>roten Linie</b> (die Wand verformt sich). Der Bereich schwankt und wird mit der Zeit immer enger. Leertaste oder Maus gehen auch.</div>
     </div>
 
     <div class="karte" id="karte">
@@ -117,16 +117,22 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;border-radius:8px;t
   var r0=lies(KEY_REK); if(r0){ try{var o=JSON.parse(r0); rekord=+o.p||0; rekDat=o.d||''}catch(e){} }
   $('rk').textContent=rekord;
   function neu(){ t=0; F=0; g=0; punkte=0; grund=''; spitzen=[]; naechste=3; $('pt').textContent=0; zeichne() }
-  function untere(){
-    var ein=Math.min(1,t/1.5), amp=10+Math.min(10,t/6), s=0;
-    for(var i=0;i<spitzen.length;i++){ var d=t-spitzen[i]; if(d>=0&&d<=0.9) s=Math.max(s,amp*Math.sin(Math.PI*d/0.9)) }
-    return ein*(34+12*Math.sin(t*1.1)+6*Math.sin(t*2.7+1)+s);
+  /* Band [L,U]: Mitte schwankt, Breite schrumpft mit der Zeit (46 bis 14), dazu kurze Schnittkraft-Spitzen (L steigt) und Einbrueche der Verformungsgrenze (U sinkt).
+     Mindestabstand 8, damit es immer machbar bleibt. */
+  function band(){
+    var c=52+14*Math.sin(t*0.7)+6*Math.sin(t*1.9+1), w=Math.max(14,46-t*0.55), L=c-w/2, U=c+w/2;
+    var amp=10+Math.min(8,t/8), sp=0, dip=0;
+    for(var i=0;i<spitzen.length;i++){ var d=t-spitzen[i]; if(d>=0&&d<=0.7){ var e=amp*Math.sin(Math.PI*d/0.7); if(i%2===0) sp=Math.max(sp,e); else dip=Math.max(dip,e*0.8) } }
+    L+=sp; U-=dip; if(U-L<8){ var m=(U+L)/2; L=m-4; U=m+4 }
+    L=Math.max(L,0); U=Math.min(U,100);
+    return [L*Math.min(1,t/1.5), U];
   }
-  function obere(){ return Math.max(78,92-t*0.5) }
+  function untere(){ return band()[0] }
+  function obere(){ return band()[1] }
   function schritt(dt){
     if(zustand!=='laeuft') return;
     t+=dt;
-    if(t>=naechste){ spitzen.push(naechste); naechste+=Math.max(1.6,3.4-t*0.03)+Math.random()*1.6; if(spitzen.length>6) spitzen.shift() }
+    if(t>=naechste){ spitzen.push(naechste); naechste+=Math.max(1.1,2.6-t*0.03)+Math.random()*1.2; if(spitzen.length>6) spitzen.shift() }
     F+=(halten?70:-55)*dt; F=Math.max(0,Math.min(100,F));
     var L=untere(), U=obere(), aussen=(F<L)?-1:(F>U)?1:0;
     if(aussen){ g+=dt/0.9; grund=aussen<0?'rutsch':'zu fest' } else g=Math.max(0,g-dt/0.6);

@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070b12">
+<title>Sicherung im Griff</title>
+<style>
+:root{--bg:#070b12;--panel:#0e1623;--line:#1f3050;--text:#dbe7f5;--dim:#7f93ad;--a:#19e3ff;--a2:#0a8aa0;--ok:#2dff9a;--bad:#ff4d6a;--warn:#ffb020;--glow:25,227,255}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{min-height:100vh;background:radial-gradient(900px 420px at 50% -120px,rgba(var(--glow),.13),transparent 70%),linear-gradient(rgba(25,227,255,.035) 1px,transparent 1px) 0 0/100% 28px,var(--bg);padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
+.wrap{max-width:420px;margin:0 auto}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+h1{font-size:15px;letter-spacing:.22em;text-transform:uppercase;margin:0;color:var(--a);font-weight:700}
+.sub{font-size:12px;color:var(--dim);margin-top:3px}
+.stat{font:700 11px ui-monospace,Consolas,monospace;letter-spacing:.12em;color:var(--warn);text-align:right;line-height:1.6;white-space:nowrap}
+.case{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px}
+.aufg{font-size:14px;line-height:1.45;margin:0 0 10px;min-height:4.3em}
+canvas{display:block;width:100%;height:auto;aspect-ratio:1/1;border-radius:8px;touch-action:manipulation;background:#060b14;border:1px solid var(--a2)}
+.opts{display:grid;gap:8px;margin-top:10px}
+.opts.zwei{grid-template-columns:repeat(2,1fr)}
+.opt{appearance:none;text-align:left;border:1px solid var(--a2);background:rgba(0,0,0,.35);color:var(--text);font:inherit;font-size:13.5px;line-height:1.35;padding:10px 10px;border-radius:10px;cursor:pointer;min-height:44px}
+.opt:active{background:rgba(var(--glow),.2)}
+.opt.an{border-color:var(--ok);background:rgba(45,255,154,.16);color:var(--ok)}
+.opt[disabled]{cursor:default;opacity:.7}
+.btn{appearance:none;border:1px solid var(--a);background:rgba(var(--glow),.12);color:var(--a);font:700 13px ui-monospace,Consolas,monospace;letter-spacing:.16em;padding:13px 18px;border-radius:10px;cursor:pointer;box-shadow:0 0 16px rgba(var(--glow),.22)}
+.btn[disabled]{opacity:.35;box-shadow:none;cursor:default}
+.btn.voll{display:block;width:100%;margin-top:10px}
+.fb{margin-top:10px;font-size:13.5px;line-height:1.45;color:var(--warn);min-height:2.9em}
+.fb.ok{color:var(--ok)}
+.panel{display:none;margin-top:10px;background:var(--panel);border:1px solid var(--a2);border-radius:14px;padding:14px}
+.panel .tag{font:700 11px ui-monospace,Consolas,monospace;letter-spacing:.14em;color:var(--a);margin-bottom:6px}
+.panel .q{font-size:14.5px;line-height:1.5;margin-bottom:10px}
+.panel .opts{margin-top:0}
+.panel .fb2{margin-top:10px;font-size:13.5px;line-height:1.45;color:var(--warn);min-height:1em}
+.karte{display:none;margin-top:10px;border:1px solid var(--ok);border-radius:14px;padding:14px;text-align:center;background:radial-gradient(circle at 50% 0,rgba(53,255,160,.15),transparent 70%)}
+.karte .ti{font:700 11px ui-monospace,Consolas,monospace;letter-spacing:.2em;color:var(--ok)}
+.karte .pt{font:700 40px ui-monospace,Consolas,monospace;color:var(--text);margin:4px 0}
+.karte .zl{font:13px ui-monospace,Consolas,monospace;color:var(--text);line-height:1.7}
+.karte .zl b{color:var(--ok)}
+.karte .sh{margin-top:6px;font-size:12px;color:var(--dim)}
+.gesperrt{display:none;text-align:center;background:var(--panel);border:1px solid var(--a2);border-radius:16px;padding:22px 16px}
+.gesperrt h2{margin:0 0 8px;font-size:16px;letter-spacing:.16em;color:var(--a);text-transform:uppercase}
+.gesperrt p{margin:0 0 14px;font-size:14px;line-height:1.5}
+.gesperrt a{display:inline-block;text-decoration:none}
+.foot{margin-top:14px;font-size:11.5px;color:var(--dim);text-align:center;line-height:1.5}
+.shake{animation:sh .4s}
+@keyframes sh{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header><div><h1>Sicherung im Griff</h1><div class="sub">Belohnung · Geräte parallel, Ströme addieren sich</div></div><div class="stat"><div>LEBEN <span id="lb" style="color:var(--bad);letter-spacing:.1em"></span></div><div>PUNKTE <span id="pt">0</span></div><div>REKORD <span id="rk">0</span></div></div></header>
+
+  <div class="gesperrt" id="sperre">
+    <h2>Gesperrt</h2>
+    <p>Dieses Spiel ist die Belohnung für das Arbeitsblatt. Es wird freigeschaltet, sobald du mindestens 80 % der Aufgaben auf der Kontrollseite richtig gelöst hast. <span id="stand"></span></p>
+    <a class="btn" id="zurch" href="../">ZUR KONTROLLE</a>
+  </div>
+
+  <div id="spiel" style="display:none">
+    <div class="case">
+      <p class="aufg" id="aufg">Tippe auf START. In jeder Runde schaltest du Geräte an einer Steckdosenleiste ein. Fällt die Sicherung, verlierst du ein Leben. Du hast 5 Leben.</p>
+      <canvas id="cv" width="300" height="300" aria-label="Schaltbild der Steckdosenleiste"></canvas>
+      <div class="opts zwei" id="opts"></div>
+      <button class="btn voll" type="button" id="aktion">START</button>
+      <div class="fb" id="fb" aria-live="polite"></div>
+    </div>
+
+    <div class="karte" id="karte">
+      <div class="ti">ALLE LEBEN VERLOREN · SPIELSTAND</div>
+      <div class="pt" id="kpt">0</div>
+      <div class="zl">Runden gespielt: <b id="krd">0</b><br>Rekord auf diesem Gerät: <b id="krk">0</b><br>Fachfragen richtig: <b id="kfr">0</b><br><span id="kdat"></span></div>
+      <div class="sh">Zum Vorzeigen: Screenshot machen.</div>
+    </div>
+
+    <div class="panel" id="panel">
+      <div class="tag" id="ptag">FACHFRAGE</div>
+      <div class="q" id="pq"></div>
+      <div class="opts" id="po"></div>
+      <div class="fb2" id="pfb" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <p class="foot">Funktioniert ohne Internet, sobald die Seite einmal geladen wurde.<br>Das Spiel ist freiwillig. Der Rekord wird nur auf diesem Gerät gespeichert.<br><a href="https://technixedu.de/datenschutz.html" style="color:inherit">Datenschutz</a></p>
+</div>
+<script>
+(function(){
+  'use strict';
+  var Q=new URLSearchParams(location.search);
+  var THEMA=(Q.get('t')||'parallelschaltung').replace(/[^a-z0-9-]/g,'')||'parallelschaltung';
+  var KEY_REK='ls-sicherung-rekord-'+THEMA;
+  function lies(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function schreib(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  var $=function(i){return document.getElementById(i)};
+  $('zurch').href='../'+THEMA+'/kontrolle.html';
+
+  /* ---- Sperre: mindestens 80 % der Aufgaben der Kontrollseite richtig gespeichert (ls-fort/ls-plan im Browser) */
+  var PLAN=[],FORT=[]; try{PLAN=JSON.parse(lies('ls-plan-'+THEMA)||'[]');FORT=JSON.parse(lies('ls-fort-'+THEMA)||'[]')}catch(e){}
+  PLAN=Array.isArray(PLAN)?PLAN.map(String):[]; FORT=Array.isArray(FORT)?FORT:[];
+  var GESCHAFFT=PLAN.filter(function(i){return FORT.indexOf(i)>=0}).length, BRAUCHT=Math.floor((PLAN.length*4+4)/5), FREI=PLAN.length>0&&GESCHAFFT>=BRAUCHT;
+  if(!FREI&&$('stand')) $('stand').textContent=PLAN.length?('Bisher '+GESCHAFFT+' von '+PLAN.length+', nötig sind '+BRAUCHT+'.'):'Öffne zuerst die Kontrollseite.';
+  if(!FREI){ $('sperre').style.display='block'; if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){try{navigator.serviceWorker.register('sw.js')}catch(e){}} return }
+  $('spiel').style.display='block';
+
+  /* ---- Fachfragen laden */
+  var FR=[], bag=[], letzte=-1, richtigFr=0;
+  var sc=document.createElement('script'); sc.src='fragen_'+THEMA+'.js'; sc.onload=function(){FR=window.FRAGEN||[]}; sc.onerror=function(){FR=[]}; document.head.appendChild(sc);
+  function naechsteFrage(){
+    if(!FR.length) return -1;
+    if(!bag.length){ for(var i=0;i<FR.length;i++) bag.push(i); mische(bag);
+      if(bag.length>1 && bag[bag.length-1]===letzte){ var x=bag.pop(); bag.unshift(x) } }
+    letzte=bag.pop(); return letzte;
+  }
+  function rnd(n){return Math.floor(Math.random()*n)}
+  function mische(a){ for(var j=a.length-1;j>0;j--){var k=rnd(j+1); var t=a[j]; a[j]=a[k]; a[k]=t} return a }
+  function fmt(v){ return String(Math.round(v*100)/100).replace('.',',') }
+
+  /* ---- Geraete: Widerstand im Betrieb an 230 V, Strom I = 230 V / R (aus Zahlen gebaut, die glatte Stroeme ergeben) */
+  var UN=230;
+  var GERAETE=[{n:'Lötkolben',R:230},{n:'Baustrahler',R:115},{n:'Bohrmaschine',R:92},{n:'Absaugung',R:57.5},{n:'Wasserkocher',R:46},{n:'Heizlüfter',R:23},{n:'Lampe',R:230},{n:'Radio',R:115},{n:'Schleifer',R:92}];
+  GERAETE.forEach(function(g){ g.I=UN/g.R });
+
+  var cv=$('cv'), cx=cv.getContext('2d');
+  var zustand='bereit', leben=5, punkte=0, rekord=0, runde=0, R=null, rest=0, fbOk=false, fbT=0, zeitT=0, banner='';
+  var r0=lies(KEY_REK); if(r0){ try{var o=JSON.parse(r0); rekord=+o.p||0}catch(e){} }
+  $('rk').textContent=rekord;
+  function zeigeLeben(){ var x=''; for(var i=0;i<5;i++) x+=i<leben?'●':'○'; $('lb').textContent=x }
+  var C={bg:'#060b14',lei:'#7f93ad',komp:'#aab4bf',rand:'#19e3ff',txt:'#dbe7f5',dim:'#8d99a8',ok:'#2dff9a',bad:'#ff4d6a',warn:'#ffb020'};
+  function schaerfe(){ var w=cv.clientWidth||300, r=Math.min(4,Math.max(1,w*(window.devicePixelRatio||1)/300)); var n=Math.round(300*r); if(cv.width!==n){ cv.width=n; cv.height=n } cx.setTransform(n/300,0,0,n/300,0,0); zeichne() }
+
+  /* ---- Runde erzeugen: Sicherung L, n Geraete, beste Auswahl (groesster Gesamtstrom <= L) */
+  function bestes(devs,L){ var n=devs.length, best=-1, set=0; for(var m=0;m<(1<<n);m++){ var s=0; for(var i=0;i<n;i++) if(m&(1<<i)) s+=devs[i].I; if(s<=L+1e-9&&s>best+1e-9){ best=s; set=m } } return {s:best,m:set} }
+  function neueRunde(){
+    runde++;
+    var n=Math.min(7,4+Math.floor((runde-1)/3)), Ls=runde<3?[16]:[10,13,16,20], L, devs, b, tries=0;
+    do{ L=Ls[rnd(Ls.length)]; devs=mische(GERAETE.slice()).slice(0,n).map(function(g){return {n:g.n,R:g.R,I:g.I,an:false}}); b=bestes(devs,L); tries++;
+        var gs=devs.reduce(function(a,d){return a+d.I},0) }while((gs<=L||b.s<L*0.7)&&tries<500);
+    var zeigeI=runde<=3;
+    R={L:L,devs:devs,best:b.s,bestM:b.m,zeit:Math.max(14,28-runde*1.2),zeigeI:zeigeI};
+    rest=R.zeit; zustand='runde'; fbOk=false; banner='';
+    $('aufg').textContent='Sicherung '+L+' A, Netz '+UN+' V. Schalte Geräte ein, sodass der Gesamtstrom möglichst nahe an '+L+' A kommt, ohne die Sicherung auszulösen. '+(zeigeI?'Die Stromstärke jedes Geräts steht dabei.':'Die Stromstärke der Geräte musst du aus dem Widerstand berechnen.');
+    $('fb').textContent=''; $('fb').className='fb';
+    var box=$('opts'); box.innerHTML='';
+    devs.forEach(function(d,i){ var b2=document.createElement('button'); b2.type='button'; b2.className='opt'; b2.id='g'+i; b2.textContent=d.n+' · '+fmt(d.R)+' Ω'+(zeigeI?' · '+fmt(d.I)+' A':''); b2.addEventListener('click',function(){ schalte(i) }); box.appendChild(b2) });
+    var ak=$('aktion'); ak.style.display='block'; ak.disabled=false; ak.textContent='FERTIG'; zeichne();
+  }
+  function gesamt(){ var s=0; if(R) R.devs.forEach(function(d){ if(d.an) s+=d.I }); return s }
+  function schalte(i){
+    if(zustand!=='runde') return;
+    var d=R.devs[i];
+    if(d.an){ d.an=false; $('g'+i).classList.remove('an'); zeichne(); return }
+    if(gesamt()+d.I>R.L+1e-9){ d.an=true; $('g'+i).classList.add('an'); ausgeloest(gesamt()); return }
+    d.an=true; $('g'+i).classList.add('an'); zeichne();
+  }
+  function sperreGeraete(){ var bs=$('opts').children; for(var j=0;j<bs.length;j++) bs[j].disabled=true }
+  function loesung(){ var l=[]; R.devs.forEach(function(d,i){ if(R.bestM&(1<<i)) l.push(d.n+' ('+fmt(d.I)+' A)') }); return l.join(' + ')+' = '+fmt(R.best)+' A' }
+  function ausgeloest(s){
+    sperreGeraete(); zustand='fb'; fbOk=false; fbT=0; leben--; zeigeLeben(); banner='SICHERUNG GEFALLEN · LEBEN WEG';
+    $('fb').className='fb'; $('fb').textContent='Der Gesamtstrom '+fmt(s)+' A plus das zuletzt eingeschaltete Gerät ist größer als '+R.L+' A. In der Parallelschaltung addieren sich die Ströme der Geräte. Möglich wäre: '+loesung()+'.';
+    var a=$('app'); a.classList.remove('shake'); void a.offsetWidth; a.classList.add('shake'); if(navigator.vibrate){try{navigator.vibrate(60)}catch(e){}}
+    $('aktion').textContent='WEITER'; zeichne();
+  }
+  function fertig(){
+    if(zustand!=='runde') return;
+    var s=gesamt(); sperreGeraete(); zustand='fb'; fbT=0; fbOk=true; $('fb').className='fb ok';
+    var pk=0;
+    if(s>R.best-1e-9&&s>0){ pk=100+Math.ceil(rest*3); banner='OPTIMAL +'+pk; $('fb').textContent='Besser geht es nicht: '+fmt(s)+' A von '+R.L+' A. '+(R.best===s?'Eine Möglichkeit: '+loesung()+'.':'') }
+    else if(s>0){ pk=Math.round(60*s/R.best); banner='+'+pk; $('fb').className='fb'; $('fb').textContent='Du hast '+fmt(s)+' A geschaltet, möglich waren '+fmt(R.best)+' A: '+loesung()+'.' }
+    else { banner='NICHTS GESCHALTET'; $('fb').className='fb'; $('fb').textContent='Es lief kein Gerät. Möglich wären '+fmt(R.best)+' A: '+loesung()+'.' }
+    punkte+=pk; $('pt').textContent=punkte; $('aktion').textContent='WEITER'; zeichne();
+  }
+  function weiter(){ if(zustand!=='fb') return; if(leben<=0) ende(); else neueRunde() }
+  $('aktion').addEventListener('click',function(){
+    if(zustand==='bereit'){ leben=5; punkte=0; runde=0; $('pt').textContent=0; zeigeLeben(); $('karte').style.display='none'; $('panel').style.display='none'; neueRunde() }
+    else if(zustand==='runde') fertig();
+    else if(zustand==='fb') weiter();
+  });
+
+  var letztes=0;
+  function schritt(dt){
+    zeitT+=dt;
+    if(zustand==='runde'){ rest-=dt; if(rest<=0){ rest=0; fertig() } }
+    else if(zustand==='fb'){ fbT+=dt; if(fbT>=6) weiter() }
+    if(zustand==='runde'||zustand==='fb') zeichne();
+  }
+  function lauf(ts){ var dt=letztes?Math.min(0.05,(ts-letztes)/1000):0.016; letztes=ts; if(zustand==='runde'||zustand==='fb') schritt(dt); requestAnimationFrame(lauf) }
+  requestAnimationFrame(lauf);
+  function ende(){
+    zustand='tot'; $('opts').innerHTML=''; $('aktion').style.display='none';
+    if(punkte>rekord){ rekord=punkte; schreib(KEY_REK,JSON.stringify({p:rekord,d:new Date().toLocaleDateString('de-DE')})); $('rk').textContent=rekord }
+    $('kpt').textContent=punkte; $('krd').textContent=runde; $('krk').textContent=rekord; $('kfr').textContent=richtigFr;
+    $('kdat').textContent=new Date().toLocaleDateString('de-DE')+' · '+(THEMA.charAt(0).toUpperCase()+THEMA.slice(1));
+    $('karte').style.display='block'; $('aufg').textContent='Alle Leben verloren. Beantworte die Fachfrage, dann beginnt ein neues Spiel.'; $('fb').textContent='';
+    zeichne(); zeigeFrage('');
+  }
+
+  /* ---- Zeichnen: parallele Zweige mit Schalter und Widerstand, darunter der Gesamtstrom gegen die Sicherung */
+  function linie(x1,y1,x2,y2,f,w){ cx.strokeStyle=f||C.lei; cx.lineWidth=w||2; cx.beginPath(); cx.moveTo(x1,y1); cx.lineTo(x2,y2); cx.stroke() }
+  function text(s,x,y,f,gr,al){ cx.font=(gr||11)+'px ui-monospace,Consolas,monospace'; cx.textAlign=al||'center'; cx.fillStyle=f||C.dim; cx.fillText(s,x,y) }
+  var YT=48, YB=170, XQ=32;
+  function zeichne(){
+    cx.fillStyle=C.bg; cx.fillRect(0,0,300,300);
+    var devs=R?R.devs:[{R:230,an:true},{R:115,an:false},{R:46,an:true},{R:23,an:false}], n=devs.length;
+    var xs=[]; for(var i=0;i<n;i++) xs.push(n===1?150:78+i*(262-78)/(n-1));
+    var xr=xs[n-1];
+    linie(XQ,YT,xr,YT,C.lei); linie(XQ,YB,xr,YB,C.lei);
+    linie(XQ,YT,XQ,(YT+YB)/2-12,C.lei); linie(XQ,(YT+YB)/2+12,XQ,YB,C.lei);
+    linie(XQ-8,(YT+YB)/2-12,XQ+8,(YT+YB)/2-12,C.txt,2); linie(XQ-4,(YT+YB)/2-6,XQ+4,(YT+YB)/2-6,C.txt,4);
+    text('230 V',XQ+4,YB+16,C.warn,10,'center');
+    for(i=0;i<n;i++){
+      var x=xs[i], d=devs[i], f=d.an?C.ok:C.lei, ys=YT+28, yr=(YT+YB)/2+18;
+      linie(x,YT,x,ys-9,f); linie(x,ys+9,x,yr-12,f); linie(x,yr+12,x,YB,f);
+      // Schalter
+      cx.fillStyle=C.bg; cx.strokeStyle=f; cx.lineWidth=1.6; cx.beginPath(); cx.arc(x,ys-9,2,0,7); cx.stroke(); cx.beginPath(); cx.arc(x,ys+9,2,0,7); cx.stroke();
+      if(d.an) linie(x,ys-9,x,ys+9,f,1.8); else linie(x,ys-9,x+9,ys+4,f,1.8);
+      // Widerstand
+      cx.fillStyle=C.bg; cx.fillRect(x-6,yr-12,12,24); cx.strokeStyle=f; cx.lineWidth=1.8; cx.strokeRect(x-6,yr-12,12,24);
+      if(i<n-1){ cx.fillStyle=f; cx.beginPath(); cx.arc(x,YT,2.5,0,7); cx.fill(); cx.beginPath(); cx.arc(x,YB,2.5,0,7); cx.fill() }
+      if(R){ text(fmt(d.R).replace(',0','')+' Ω',x,YB+16,d.an?C.ok:C.dim,n>6?8:9); if(R.zeigeI) text(fmt(d.I)+' A',x,YB+28,d.an?C.ok:C.dim,n>6?8:9) }
+      if(d.an&&zustand!=='bereit'){ var p=(zeitT*60+i*17)%(YB-YT); cx.fillStyle=C.ok; cx.beginPath(); cx.arc(x,YT+p,2.5,0,7); cx.fill() }
+    }
+    if(!R){ text('SICHERUNG IM GRIFF',150,22,C.rand,14); text('Tippe auf START',150,266,C.dim,12); return }
+    // Gesamtstrom gegen Sicherung
+    var s=gesamt(), Lm=R.L*1.25, bx=30, bw=240, by=226, bh=18, fx=bx+bw*R.L/Lm;
+    cx.fillStyle='#142034'; cx.fillRect(bx,by,bw,bh);
+    cx.fillStyle=s>R.L+1e-9?C.bad:s>R.L*0.8?C.warn:C.ok; cx.fillRect(bx,by,Math.min(bw,bw*s/Lm),bh);
+    linie(fx,by-6,fx,by+bh+4,C.bad,2.5); text('Sicherung '+R.L+' A',fx,by-10,C.bad,10);
+    text('Gesamtstrom '+fmt(s)+' A',bx,by+bh+16,C.txt,12,'left');
+    var f=Math.max(0,Math.min(1,rest/R.zeit)); cx.fillStyle='#142034'; cx.fillRect(30,276,240,6); cx.fillStyle=f<0.3?C.bad:C.warn; cx.fillRect(30,276,240*f,6); text('Runde '+runde,270,270,C.dim,10,'right');
+    if(banner){ cx.font='bold 14px ui-monospace,Consolas,monospace'; var w=cx.measureText(banner).width+20; cx.fillStyle=C.bg; cx.fillRect(150-w/2,100,w,28); cx.strokeStyle=zustand==='fb'&&banner.indexOf('GEFALLEN')>=0?C.bad:C.ok; cx.lineWidth=2; cx.strokeRect(150-w/2,100,w,28); cx.fillStyle=cx.strokeStyle; cx.textAlign='center'; cx.fillText(banner,150,119) }
+  }
+
+  /* ---- Fachfrage nach dem letzten Leben */
+  var aktuell=-1;
+  function zeigeFrage(meldung){
+    $('panel').style.display='block'; $('pfb').textContent=meldung||'';
+    var qi=naechsteFrage(), box=$('po'); box.innerHTML='';
+    if(qi<0){ $('ptag').textContent='NEUSTART'; $('pq').textContent='Die Fachfragen konnten nicht geladen werden. Du kannst trotzdem neu starten.'; var b0=document.createElement('button'); b0.className='btn'; b0.type='button'; b0.textContent='NEUES SPIEL'; b0.addEventListener('click',freigeben); box.appendChild(b0); return }
+    aktuell=qi; var f=FR[qi]; $('ptag').textContent='FACHFRAGE · RICHTIG BEANTWORTEN ZUM NEUSTART'; $('pq').textContent=f.f;
+    var reihe=f.o.map(function(x,i){return {t:x,i:i}}); mische(reihe);
+    reihe.forEach(function(e){ var b=document.createElement('button'); b.type='button'; b.className='opt'; b.textContent=e.t; b.addEventListener('click',function(){ antwortFr(e.i===f.r) }); box.appendChild(b) });
+  }
+  function antwortFr(ok){
+    if(zustand!=='tot') return;
+    if(ok){ richtigFr++; $('kfr').textContent=richtigFr; freigeben() }
+    else { var a=$('app'); a.classList.remove('shake'); void a.offsetWidth; a.classList.add('shake'); zeigeFrage('Leider falsch. Hier kommt eine neue Frage.') }
+  }
+  function freigeben(){ $('panel').style.display='none'; $('karte').style.display='none'; zustand='bereit'; R=null; leben=5; punkte=0; runde=0; $('pt').textContent=0; zeigeLeben();
+    $('aufg').textContent='Tippe auf START für ein neues Spiel.'; $('opts').innerHTML=''; var ak=$('aktion'); ak.style.display='block'; ak.disabled=false; ak.textContent='START'; $('fb').textContent=''; zeichne() }
+
+  /* Testhaken fuer Browsertests */
+  window.__si={zustand:function(){return zustand},punkte:function(){return punkte},leben:function(){return leben},runde:function(){return R},rundenNr:function(){return runde},gesamt:gesamt,
+    schritt:schritt,schalte:schalte,fertig:fertig,weiter:weiter,frage:function(){return aktuell>=0?FR[aktuell]:null},antwortFr:antwortFr,
+    optimum:function(){ if(zustand!=='runde') return false; for(var i=0;i<R.devs.length;i++) if((R.bestM&(1<<i))&&!R.devs[i].an) schalte(i); return true },
+    ueberlast:function(){ if(zustand!=='runde') return false; for(var i=0;i<R.devs.length;i++){ if(zustand!=='runde') break; if(!R.devs[i].an) schalte(i) } return true }};
+  zeigeLeben(); schaerfe(); window.addEventListener('resize',schaerfe); window.addEventListener('orientationchange',schaerfe);
+  if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){try{navigator.serviceWorker.register('sw.js')}catch(e){}}
+})();
+</script>
+</body>
+</html>

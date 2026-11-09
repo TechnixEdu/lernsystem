@@ -3,112 +3,190 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#070b12">
+<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#1e1e1e" media="(prefers-color-scheme: dark)">
 <title>Ergebnis-Kontrolle: Reihenschaltung</title>
 <style>
-:root{--bg:#070b12;--panel:#0e1623;--panel2:#142034;--line:#1f3050;--text:#dbe7f5;--dim:#7f93ad;--cyan:#19e3ff;--cyan-d:#0a8aa0;--ok:#2dff9a;--warn:#ffb020;--bad:#ff4d6a}
+/* Fenster: neutrale Titelleiste, durchscheinende Werkzeugleiste, gruppierte Karten. Gedämpfte Farben: ein ruhiger Blaugrauton als Akzent, Grün, Ocker und Gold nur mit Bedeutung. Hell und dunkel automatisch */
+:root{--lsb-stil:apple;--desk:linear-gradient(135deg,#cfd9ee 0%,#e6dff0 55%,#f3e6df 100%);--win:#f5f5f7;--bar:rgba(246,246,248,.82);--bg:#f5f5f7;--card:#ffffff;--label:#1d1d1f;--sec:#6e6e73;--ter:#8e8e93;--sep:rgba(0,0,0,.12);--tint:#3d6a9e;--tintbg:rgba(61,106,158,.11);--on-tint:#ffffff;--ok:#3f7d5c;--okbg:rgba(63,125,92,.12);--warn:#a46a22;--warnbg:rgba(164,106,34,.12);--fill:rgba(0,0,0,.055);--reward:#c4932f;--g1:#6aae8a;--g2:#d8b658;--g3:#d68f55;--cyan:var(--tint);--sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,Roboto,sans-serif;--disp:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif;--mono:ui-monospace,"SF Mono",SFMono-Regular,Consolas,monospace;--serif:"New York",Georgia,"Times New Roman",serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--desk:linear-gradient(135deg,#1b2238 0%,#2a2140 55%,#35252c 100%);--win:#1e1e1e;--bar:rgba(44,44,46,.82);--bg:#1e1e1e;--card:#2c2c2e;--label:#f5f5f7;--sec:#a1a1a6;--ter:#8e8e93;--sep:rgba(255,255,255,.12);--tint:#86aedb;--tintbg:rgba(134,174,219,.16);--on-tint:#0e1a2a;--ok:#7cc4a0;--okbg:rgba(124,196,160,.14);--warn:#e0b56a;--warnbg:rgba(224,181,106,.14);--fill:rgba(255,255,255,.09);--reward:#d9b35a;--g1:#7cc4a0;--g2:#dcc06a;--g3:#e0a070;color-scheme:dark}}
+:root[data-theme="dark"]{--desk:linear-gradient(135deg,#1b2238 0%,#2a2140 55%,#35252c 100%);--win:#1e1e1e;--bar:rgba(44,44,46,.82);--bg:#1e1e1e;--card:#2c2c2e;--label:#f5f5f7;--sec:#a1a1a6;--ter:#8e8e93;--sep:rgba(255,255,255,.12);--tint:#86aedb;--tintbg:rgba(134,174,219,.16);--on-tint:#0e1a2a;--ok:#7cc4a0;--okbg:rgba(124,196,160,.14);--warn:#e0b56a;--warnbg:rgba(224,181,106,.14);--fill:rgba(255,255,255,.09);--reward:#d9b35a;--g1:#7cc4a0;--g2:#dcc06a;--g3:#e0a070;color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-body{min-height:100vh;background:radial-gradient(900px 420px at 50% -120px,rgba(25,227,255,.13),transparent 70%),linear-gradient(rgba(25,227,255,.035) 1px,transparent 1px) 0 0/100% 28px,var(--bg);padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
-.wrap{max-width:440px;margin:0 auto}
-h1{font-size:15px;letter-spacing:.22em;text-transform:uppercase;margin:0;font-weight:600;color:var(--cyan)}
-.sub{font-size:12px;color:var(--dim);letter-spacing:.04em;margin:3px 0 16px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
-.card h2{margin:0 0 4px;font-size:16px}
-.card p{margin:0;color:var(--dim);font-size:13px;line-height:1.4}
-.pick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.pick a{display:block;text-align:center;border:1px solid var(--cyan-d);border-radius:10px;padding:14px 6px;color:var(--cyan);text-decoration:none;font:700 13px ui-monospace,Consolas,monospace;letter-spacing:.06em;background:rgba(25,227,255,.06)}
-.row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
-.row:last-of-type{border-bottom:0}
-.lab{flex:1 1 100%;font-size:14px}
-.lab i{font-style:italic}
-.in{display:flex;align-items:center;gap:8px;flex:1 1 auto}
-input,select{font:inherit;font-size:16px;color:var(--text);background:#060b14;border:1px solid var(--cyan-d);border-radius:8px;padding:9px 10px;min-width:0}
-input[type=text]{width:96px;font-family:ui-monospace,Consolas,monospace}
-input.sm{width:64px}
-select{max-width:100%}
-.in{min-width:0;max-width:100%}
-.in select.wide{width:100%;text-overflow:ellipsis}
-input:focus,select:focus{outline:2px solid var(--cyan);outline-offset:1px}
-.st{flex:0 0 auto;width:24px;height:24px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#2c4366}
-.st.ok{border-color:var(--ok);color:#04120b;background:var(--ok);box-shadow:0 0 12px rgba(45,255,154,.5)}
-.st.no{border-color:var(--warn);color:#201400;background:var(--warn)}
-.fb{flex:1 1 100%;font-size:13px;color:var(--warn);line-height:1.4;display:none}
-.fb.show{display:block}
-.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-.btn{appearance:none;border:1px solid var(--cyan);background:rgba(25,227,255,.08);color:var(--cyan);font:700 13px ui-monospace,Consolas,monospace;letter-spacing:.16em;padding:12px 22px;border-radius:10px;cursor:pointer;box-shadow:0 0 18px rgba(25,227,255,.2)}
-.btn:active{background:rgba(25,227,255,.22)}
-.btn.sec{border-color:var(--line);color:var(--dim);box-shadow:none;background:none;letter-spacing:.08em}
-.msg{margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.5;display:none}
-.msg.show{display:block}
-.msg.ok{border-color:#145a3a;background:rgba(45,255,154,.07)}
-.msg.warn{border-color:#5a4210}
-.muster{margin-top:12px;border:1px dashed var(--cyan-d);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.55;display:none;white-space:pre-line}
-.muster.show{display:block}
-.muster b{color:var(--cyan)}
-.nav{display:flex;justify-content:space-between;margin-top:16px;font-size:13px}
-.nav a{color:var(--dim)}
-.note{margin-top:14px;font-size:12px;color:var(--dim);line-height:1.5;text-align:center}
-.prog .pt{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;margin-bottom:8px}
-.prog .pt b{font:700 15px ui-monospace,Consolas,monospace;color:var(--text)}
-.bar{position:relative;height:10px;border-radius:6px;background:#060b14;border:1px solid var(--line);overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:var(--cyan-d)}
+html{font-size:100%}
+body{margin:0;min-height:100vh;background:var(--desk);color:var(--label);font:400 1.0625rem/1.4 var(--sans);-webkit-font-smoothing:antialiased;hyphens:auto;padding-block:28px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.win{max-width:620px;margin:0 auto;background:var(--win);border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.14),0 22px 60px rgba(0,0,0,.28)}
+.toolbar{padding:10px 16px;background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);border-bottom:1px solid var(--sep)}
+.content{padding:20px 20px 34px;max-width:520px;margin:0 auto}
+@media (max-width:520px){body{padding-block:0;padding-left:0;padding-right:0}.win{border-radius:0;box-shadow:none;min-height:100vh}.content{padding:16px max(16px,env(safe-area-inset-right,0px)) 34px max(16px,env(safe-area-inset-left,0px))}}
+a{color:var(--tint)}
+/* Umschalter */
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--fill);border-radius:9px;padding:2px;max-width:420px;margin:0 auto}
+.seg a{text-align:center;text-decoration:none;color:var(--label);font:600 .9375rem/1 var(--sans);padding:10px 8px;border-radius:8px;min-height:40px;display:flex;align-items:center;justify-content:center}
+.seg a.an{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.16),0 0 0 .5px rgba(0,0,0,.06)}
+:root[data-theme="dark"] .seg a.an{background:var(--card)}
+h2{font:600 .8125rem/1 var(--sans);color:var(--sec);text-transform:uppercase;letter-spacing:.05em;margin:24px 16px 8px}
+h2.aufg{font:600 1.25rem/1.25 var(--sans);text-transform:none;letter-spacing:0;color:var(--label);margin:0 0 4px}
+.card{background:var(--card);border-radius:12px;box-shadow:0 0 0 1px var(--sep);margin-bottom:12px;padding:14px 16px;overflow:hidden}
+.card h2{margin:0 0 4px;font:600 1.25rem/1.25 var(--sans);text-transform:none;letter-spacing:0;color:var(--label)}
+.card p{margin:0;color:var(--sec);font-size:.9375rem;line-height:1.4}
+/* Fortschritt */
+.prog .pt{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.prog .pt span{font:700 1.5rem/1 var(--disp);letter-spacing:-.02em}
+.prog .pt b{font-size:.9375rem;color:var(--sec);font-weight:500}
+.bar{position:relative;height:8px;border-radius:4px;background:var(--fill);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--tint);border-radius:4px}
 .bar.frei i{background:var(--ok)}
-.bar u{position:absolute;top:0;bottom:0;left:80%;width:1px;background:var(--dim)}
-.prog .cs{margin-top:8px;font-size:12px;color:var(--dim);line-height:1.4}
+.bar u{position:absolute;top:0;bottom:0;width:2px;background:var(--card)}
+.prog .cs{margin-top:10px;font-size:.9375rem;color:var(--sec)}
 .prog .cs.frei{color:var(--ok)}
-.pick a.done{border-color:var(--ok);color:var(--ok)}
-.fin{margin-top:8px;font-size:13px;color:var(--ok);display:none}
+/* Aufgabenwahl */
+.pick{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+.pick a{display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:12px 16px;border-radius:14px;background:var(--card);color:var(--label);text-decoration:none;font:600 1.0625rem/1.2 var(--sans)}
+.pick a.done{color:var(--ok)}
+/* Felder */
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:14px 0;border-top:1px solid var(--sep)}
+.card>.row:first-child,form .row:first-of-type{border-top:0}
+.lab{flex:1 1 100%;font-size:.9375rem;color:var(--sec)}
+.lab i{font-style:italic;color:var(--label)}
+.in{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;max-width:100%}
+input[type=text]{font:500 1.25rem/1 var(--mono);color:var(--label);background:var(--fill);border:2px solid transparent;border-radius:12px;padding:13px 14px;width:9rem;min-width:0}
+input.sm{width:5rem}
+select{font:inherit;font-size:1.0625rem;color:var(--label);background:var(--fill);border:2px solid transparent;border-radius:12px;padding:12px 12px;max-width:100%;min-width:0}
+.in select.wide{width:100%;text-overflow:ellipsis}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--tint);outline-offset:1px}
+.st{flex:0 0 auto;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 .875rem/1 var(--sans);color:transparent;background:var(--fill)}
+.st.ok{background:var(--ok);color:var(--card)}
+.st.no{background:var(--warn);color:var(--card)}
+.fb{flex:1 1 100%;display:none;font-size:.9375rem;color:var(--warn);background:var(--warnbg);border-radius:10px;padding:9px 12px;line-height:1.4}
+.fb.show{display:block}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.btn{appearance:none;border:0;background:var(--tint);color:var(--on-tint);font:600 1.0625rem/1 var(--sans);padding:15px 22px;border-radius:14px;cursor:pointer;min-height:48px}
+.btn:active{opacity:.8}
+.btn.sec{background:var(--tintbg);color:var(--tint)}
+.msg{display:none;margin-top:12px;border-radius:12px;padding:12px 14px;font-size:1rem;line-height:1.45;background:var(--fill)}
+.msg.show{display:block}
+.msg.ok{background:var(--okbg)}
+.msg.warn{background:var(--warnbg)}
+.msg b{font-weight:600}
+.msg small{color:var(--sec);font-size:.9375rem}
+.muster{display:none;margin-top:12px;border-radius:12px;padding:12px 14px;background:var(--okbg);font:400 1.0625rem/1.5 var(--serif);white-space:pre-line}
+.muster.show{display:block}
+.muster b{font:600 .8125rem/1 var(--sans);color:var(--ok);text-transform:uppercase;letter-spacing:.06em}
+.fin{display:none;margin-top:8px;font-size:.9375rem;color:var(--ok);font-weight:600}
 .fin.show{display:block}
-.hlp{margin-top:12px}
-.hlp h3{margin:0 0 6px;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
-.hl{border-top:1px solid var(--line)}
-.hh{display:flex;align-items:center;gap:10px;width:100%;padding:11px 2px;background:none;border:0;color:var(--text);font:inherit;font-size:14px;text-align:left;cursor:pointer}
-.hh[disabled]{cursor:default;opacity:.45}
-.hh .dot{flex:0 0 auto;width:9px;height:9px;border-radius:50%}
+.nav{display:flex;justify-content:space-between;gap:10px;margin:6px 4px 0;font-size:.9375rem}
+.nav a{text-decoration:none}
+.note{margin:16px 4px 0;font-size:.8125rem;color:var(--sec);line-height:1.5}
+.note a{color:var(--sec)}
+.note a.tl{color:var(--tint);font-weight:600;font-size:.9375rem;display:inline-block;margin-top:8px}
+.mitte{text-align:center}
+/* Hilfe */
+.hlp h3{margin:0 0 6px;font:600 .8125rem/1 var(--sans);letter-spacing:.05em;text-transform:uppercase;color:var(--sec)}
+.hl{border-top:1px solid var(--sep)}
+.hl:first-of-type{border-top:0}
+.hh{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;padding:10px 0;background:none;border:0;color:var(--label);font:inherit;font-size:1.0625rem;text-align:left;cursor:pointer}
+.hh[disabled]{cursor:default;color:var(--ter)}
+.hh .dot{flex:0 0 auto;width:12px;height:12px;border-radius:50%}
+.hh[disabled] .dot{opacity:.45}
 .hh .t{flex:1}
-.hh .s{font:600 11px ui-monospace,Consolas,monospace;color:var(--dim);letter-spacing:.1em}
-.hb{display:none;margin:0 0 12px 19px;padding:2px 0 2px 12px;border-left:2px solid var(--line);font-size:14px;line-height:1.5}
+.hh .s{font-size:.9375rem;color:var(--ter);font-weight:400}
+.hl.open .hh .s{color:var(--sec)}
+.hb{display:none;margin:0 0 12px 24px;font-size:1rem;line-height:1.5;color:var(--label)}
 .hl.open .hb{display:block}
-.hl.open .hh .s{color:var(--text)}
-.pop{animation:pop .4s}
-@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.015)}100%{transform:scale(1)}}
+.pop{animation:pop .35s}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.012)}100%{transform:scale(1)}}
+/* Regal */
+.zahlen{display:grid;grid-template-columns:repeat(3,1fr);margin-top:16px;border-top:1px solid var(--sep)}
+.zahlen div{padding:14px 4px 0}
+.zahlen div+div{border-left:1px solid var(--sep)}
+.zahlen b{display:block;font:700 1.5rem/1 var(--disp);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.zahlen span{display:block;font-size:.75rem;color:var(--sec);margin-top:4px;line-height:1.25}
+.fach{padding:14px 16px 16px}
+.fk{display:flex;align-items:center;gap:12px}
+.fk .ic{font-size:1.5rem;line-height:1}
+.fk .na{flex:1;font:600 1.125rem/1.2 var(--sans);color:var(--label);text-decoration:none}
+.pips{display:flex;gap:5px}.pips b{width:10px;height:10px;border-radius:50%;background:var(--fill)}
+.bal{display:grid;grid-template-columns:6.5rem 1fr 2.6rem;gap:10px;align-items:center;margin-top:11px;font-size:.875rem;color:var(--sec)}
+.bal .bar{height:6px}
+.bal .bar.gr i{background:var(--ok)}
+.bal .bar.bl i{background:var(--tint)}
+.bal em{font-style:normal;text-align:right;color:var(--label);font-variant-numeric:tabular-nums;font-size:.8125rem}
+.stolper{margin-top:12px;font-size:.875rem;color:var(--sec);line-height:1.9}
+.stolper a{color:var(--warn);text-decoration:none;background:var(--warnbg);border-radius:8px;padding:4px 10px;margin-right:6px;white-space:nowrap;display:inline-block}
+.stolper a.ok{color:var(--ok);background:var(--okbg)}
+.liste{padding:2px 16px}
+.li{display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--sep)}
+.li:first-child{border-top:0}
+.li .em{flex:0 0 auto;width:40px;height:40px;border-radius:10px;background:var(--fill);display:flex;align-items:center;justify-content:center;font-size:1.375rem;line-height:1}
+.li .t{flex:1;min-width:0}
+.li .na{font:600 1.0625rem/1.25 var(--sans);color:var(--label)}
+.li .dt{font-size:.8125rem;color:var(--ter)}
+.li .zz{text-align:right;font:600 1.0625rem/1.25 var(--sans);color:var(--sec);font-variant-numeric:tabular-nums;white-space:nowrap}
+.li .zz small{display:inline;font:400 1.0625rem/1.25 var(--sans);color:var(--sec);margin-left:.3em;letter-spacing:0}
+textarea{width:100%;height:5.5rem;font:.8125rem/1.4 var(--mono);color:var(--label);background:var(--fill);border:2px solid transparent;border-radius:12px;padding:10px;resize:vertical;word-break:break-all}
+details summary{cursor:pointer;font-size:1.0625rem;min-height:32px}
+details p{margin:8px 0}
+.mel{font-size:.9375rem;margin-top:8px;min-height:1em}
+label.tg{display:flex;align-items:center;gap:10px;font-size:.9375rem;margin-top:12px;color:var(--sec);min-height:36px}
+label.tg input{width:20px;height:20px;accent-color:var(--tint)}
 @media (prefers-reduced-motion:reduce){.pop{animation:none}}
+#stats{text-align:center;padding:14px 16px}
+#stats .zahlen{margin-top:0;border-top:0}
+#stats .zahlen div{padding-top:0}
+.content{padding-top:16px}
+button,summary,details,label,select,input,a{font-family:var(--sans)}
+input[type=text],textarea{font-family:var(--mono)}
+details summary{font:500 1.0625rem/1.3 var(--sans);list-style-position:inside}
+.rang{display:flex;justify-content:flex-start;align-items:center;gap:14px;text-align:left;padding:16px}
+.rang .rem{flex:0 0 auto;width:48px;height:48px;border-radius:12px;background:color-mix(in srgb,var(--reward) 16%,var(--card));display:flex;align-items:center;justify-content:center;font-size:1.625rem;line-height:1}
+.rang .rl{color:var(--sec);font-size:.8125rem}
+.rang .rn{font:700 1.375rem/1.2 var(--disp);letter-spacing:-.01em}
+.bar u{left:80%}
+
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>Kontrolle</h1>
-  <div class="sub">Ergebnisse prüfen · Reihenschaltung</div>
-  <div id="app"></div>
-  <p class="note">Rechne zuerst auf dem Blatt, dann trage dein Ergebnis ein. Du kannst Komma oder Punkt schreiben.<br>Funktioniert ohne Internet, sobald die Seite einmal geladen wurde.<br><a href="https://technixedu.de/datenschutz.html" style="color:inherit">Datenschutz</a> · <a href="#" id="reset" style="color:inherit">Fortschritt zurücksetzen</a></p>
-</div>
+<main class="win">
+  <nav class="toolbar" aria-label="Ansicht"><div class="seg"><a href="kontrolle.html" class="an">Kontrolle</a><a href="../abzeichen/#fortschritt">Fortschritt</a><a href="../abzeichen/#abzeichen">Abzeichen</a></div></nav>
+  <div class="content">
+    <div id="app"></div>
+    <p class="note">Rechne zuerst auf dem Blatt, dann trage dein Ergebnis ein. Komma oder Punkt sind beide in Ordnung. Die Seite funktioniert ohne Internet, sobald sie einmal geladen wurde.<br><a href="https://technixedu.de/datenschutz.html">Datenschutz</a> · <a href="#" id="reset">Fortschritt zurücksetzen</a></p>
+  </div>
+</main>
+<script src="badges.js"></script>
 <script>
 (function(){
   'use strict';
   // Feldarten: num (Zahl + Einheit), ratio (a : b), wahl (Auswahl). tol = erlaubte relative Abweichung.
   var EH={Ohm:[['Ω',1],['kΩ',1000]],V:[['V',1],['mV',0.001]],A:[['A',1],['mA',0.001]],W:[['W',1],['kW',1000]],plain:[['',1]]};
-  var D={"thema": "Ohmsches Gesetz", "kennung": "ohm", "reihenfolge": ["1", "2", "3", "4", "5", "6", "7"], "aufgaben": {"1": {"titel": "Messreihen deuten", "felder": [{"t": "wahl", "l": "Bauteil 1", "o": ["Strom ist proportional zur Spannung, <i>R</i> ist konstant", "Strom ist von der Spannung unabhängig", "<i>R</i> wächst mit der Spannung"], "r": 0}, {"t": "wahl", "l": "Bauteil 2", "o": ["<i>R</i> ist konstant", "<i>R</i> wächst mit der Spannung", "<i>R</i> sinkt mit der Spannung"], "r": 1}], "hinweis": "Rechne bei jeder Messung Spannung durch Strom. Bleibt der Wert gleich?", "muster": "Bauteil 1: U : I = 20 Ω immer, konstant. Bauteil 2: U : I wächst von 20 Ω auf 37,5 Ω.", "nur": "Die Begründung (Ursache) vergleichst du mit der Musterantwort:"}, "2": {"titel": "Strom einer Magnetspule", "felder": [{"t": "num", "l": "Strom <i>I</i>", "e": "A", "v": 0.4, "falsch": [[360, "Du hast Spannung mal Widerstand gerechnet. Der Strom ist Spannung durch Widerstand."], [2.5, "Du hast Widerstand durch Spannung gerechnet."]]}], "hinweis": "Strom = Spannung durch Widerstand.", "muster": "I = 12 V durch 30 Ω = 0,4 A", "hilfe": ["Welche Größen sind gegeben, welche ist gesucht? Wie hängen die drei Größen zusammen?", "Tabellenbuch: Ohmsches Gesetz. Nach der gesuchten Größe umstellen.", "Strom = Spannung durch Widerstand. Auf die Einheit achten."]}, "3": {"titel": "Die fehlende Größe", "felder": [{"t": "num", "l": "Fall 1: Spannung <i>U</i>", "e": "V", "v": 12}, {"t": "num", "l": "Fall 2: Strom <i>I</i>", "e": "A", "v": 5}, {"t": "num", "l": "Fall 3: Widerstand <i>R</i>", "e": "Ohm", "v": 300, "falsch": [[0.3, "Du hast 40 mA nicht in Ampere umgerechnet oder falsch geteilt: R = U durch I."], [480, "Hier musst du teilen, nicht multiplizieren."]]}], "hinweis": "Stelle das Ohmsche Gesetz nach der fehlenden Größe um. 40 mA sind 0,040 A.", "muster": "Fall 1: 12 V; Fall 2: 5 A; Fall 3: 300 Ω", "hilfe": ["Welche Größe fehlt in der Zeile? Stelle das Ohmsche Gesetz danach um.", "Tabellenbuch: Ohmsches Gesetz. Milliampere vor dem Rechnen in Ampere umrechnen.", "Zeile 1 und 2: Spannung bzw. Strom aus den beiden anderen Größen. Zeile 3: Widerstand aus Spannung und Strom."]}, "4": {"titel": "Je-desto", "felder": [{"t": "wahl", "l": "Spannung verdoppelt", "o": ["verdoppelt sich", "halbiert sich", "bleibt gleich"], "r": 0}, {"t": "wahl", "l": "Spannung halbiert", "o": ["verdoppelt sich", "halbiert sich", "bleibt gleich"], "r": 1}, {"t": "wahl", "l": "Widerstand verdoppelt", "o": ["verdoppelt sich", "halbiert sich", "bleibt gleich"], "r": 1}, {"t": "wahl", "l": "Spannung und Widerstand beide verdoppelt", "o": ["verdoppelt sich", "halbiert sich", "bleibt gleich"], "r": 2}], "hinweis": "Der Strom ist Spannung durch Widerstand. Überlege, was ein Verdoppeln im Zähler und im Nenner bewirkt.", "muster": "U doppelt: I doppelt; U halb: I halb; R doppelt: I halb; beide doppelt: I gleich."}, "5": {"titel": "Magnetventil am Netzteil", "felder": [{"t": "num", "l": "Strom der Spule <i>I</i>", "e": "A", "v": 0.5}, {"t": "wahl", "l": "Welches Netzteil?", "o": ["Netzteil A (0,3 A)", "Netzteil B (1 A)"], "r": 1}], "hinweis": "Das Netzteil muss mindestens den Strom liefern, den die Spule aufnimmt.", "muster": "I = 24 V durch 48 Ω = 0,5 A, also Netzteil B.", "nur": "Die Begründung vergleichst du mit der Musterantwort:", "hilfe": ["Wie viel Strom fließt durch die Spule? Das Netzteil muss ihn liefern können.", "Tabellenbuch: Ohmsches Gesetz. Der Verbraucher bestimmt den Strom, das Netzteil gibt nur den Höchstwert vor.", "Berechne den Strom der Spule aus Spannung und Widerstand und vergleiche ihn mit 0,3 A und 1 A."]}, "6": {"titel": "Rechnungen prüfen", "felder": [{"t": "wahl", "l": "Zeile 1: I = 12 V · 60 Ω = 720 A", "o": ["r", "f"], "r": 1}, {"t": "wahl", "l": "Zeile 2: I = 0,5 A, R = 24 Ω: U = 12 V", "o": ["r", "f"], "r": 0}, {"t": "wahl", "l": "Zeile 3: U = 230 V, I = 5 A: R = 46 Ω", "o": ["r", "f"], "r": 0}, {"t": "wahl", "l": "Zeile 4: U = 5 V, R = 100 Ω: I = 20 mA", "o": ["r", "f"], "r": 1}], "hinweis": "Prüfe Rechenweg und Einheiten.", "muster": "Zeile 1 falsch (I = 0,2 A); Zeile 4 falsch (I = 50 mA)."}, "7": {"titel": "Zusatzaufgabe: Heizlüfter", "felder": [{"t": "num", "l": "Strom eines Heizlüfters <i>I</i>", "e": "A", "v": 10}, {"t": "wahl", "l": "Dürfen zwei Heizlüfter gleichzeitig laufen?", "o": ["ja", "nein"], "r": 1}], "hinweis": "Zwei Geräte am selben Stromkreis: Die Ströme addieren sich.", "muster": "I = 10 A je Gerät; zusammen 20 A, mehr als 16 A: nein.", "hilfe": ["Schreibe zuerst auf, was gegeben und was gesucht ist. Wie viel Strom nimmt ein Heizlüfter auf?", "Tabellenbuch: Ohmsches Gesetz. Zwei Geräte am gleichen Stromkreis: Der Strom der Zuleitung ist die Summe.", "Strom eines Heizlüfters berechnen, verdoppeln und mit 16 A vergleichen."]}}, "spiel": ["kennlinie", "ohm"]};
+  var D={"thema": "Ohmsches Gesetz", "kennung": "ohm", "reihenfolge": ["1", "2", "3", "4", "5", "6", "7"], "aufgaben": {"1": {"titel": "Messreihen deuten", "felder": [{"t": "wahl", "l": "Bauteil 1", "o": ["Strom ist proportional zur Spannung, <i>R</i> ist konstant", "Strom ist von der Spannung unabhängig", "<i>R</i> wächst mit der Spannung"], "r": 0}, {"t": "wahl", "l": "Bauteil 2", "o": ["<i>R</i> ist konstant", "<i>R</i> wächst mit der Spannung", "<i>R</i> sinkt mit der Spannung"], "r": 1}], "hinweis": "Rechne bei jeder Messung Spannung durch Strom. Bleibt der Wert gleich?", "muster": "Bauteil 1: U : I = 20 Ω immer, konstant. Bauteil 2: U : I wächst von 20 Ω auf 37,5 Ω.", "nur": "Die Begründung (Ursache) vergleichst du mit der Musterantwort:"}, "2": {"titel": "Strom einer Magnetspule", "felder": [{"t": "num", "l": "Strom <i>I</i>", "e": "A", "v": 0.4, "falsch": [[360, "Du hast Spannung mal Widerstand gerechnet. Der Strom ist Spannung durch Widerstand."], [2.5, "Du hast Widerstand durch Spannung gerechnet."]]}], "hinweis": "Strom = Spannung durch Widerstand.", "muster": "I = 12 V durch 30 Ω = 0,4 A", "hilfe": ["Welche Größen sind gegeben, welche ist gesucht? Wie hängen die drei Größen zusammen?", "Tabellenbuch: Ohmsches Gesetz. Nach der gesuchten Größe umstellen.", "Strom = Spannung durch Widerstand. Auf die Einheit achten."]}, "3": {"titel": "Die fehlende Größe", "felder": [{"t": "num", "l": "Fall 1: Spannung <i>U</i>", "e": "V", "v": 12}, {"t": "num", "l": "Fall 2: Strom <i>I</i>", "e": "A", "v": 5}, {"t": "num", "l": "Fall 3: Widerstand <i>R</i>", "e": "Ohm", "v": 300, "falsch": [[0.3, "Du hast 40 mA nicht in Ampere umgerechnet oder falsch geteilt: R = U durch I."], [480, "Hier musst du teilen, nicht multiplizieren."]]}], "hinweis": "Stelle das Ohmsche Gesetz nach der fehlenden Größe um. 40 mA sind 0,040 A.", "muster": "Fall 1: 12 V; Fall 2: 5 A; Fall 3: 300 Ω", "hilfe": ["Welche Größe fehlt in der Zeile? Stelle das Ohmsche Gesetz danach um.", "Tabellenbuch: Ohmsches Gesetz. Milliampere vor dem Rechnen in Ampere umrechnen.", "Zeile 1 und 2: Spannung bzw. Strom aus den beiden anderen Größen. Zeile 3: Widerstand aus Spannung und Strom."]}, "4": {"titel": "Je-desto", "felder": [{"t": "wahl", "l": "Spannung verdoppelt", "o": ["verdoppelt sich", "halbiert sich", "bleibt gleich"], "r": 0}, {"t": "wahl", "l": "Spannung halbiert", "o": ["verdoppelt sich", "halbiert sich", "bleibt gleich"], "r": 1}, {"t": "wahl", "l": "Widerstand verdoppelt", "o": ["verdoppelt sich", "halbiert sich", "bleibt gleich"], "r": 1}, {"t": "wahl", "l": "Spannung und Widerstand beide verdoppelt", "o": ["verdoppelt sich", "halbiert sich", "bleibt gleich"], "r": 2}], "hinweis": "Der Strom ist Spannung durch Widerstand. Überlege, was ein Verdoppeln im Zähler und im Nenner bewirkt.", "muster": "U doppelt: I doppelt; U halb: I halb; R doppelt: I halb; beide doppelt: I gleich."}, "5": {"titel": "Magnetventil am Netzteil", "felder": [{"t": "num", "l": "Strom der Spule <i>I</i>", "e": "A", "v": 0.5}, {"t": "wahl", "l": "Welches Netzteil?", "o": ["Netzteil A (0,3 A)", "Netzteil B (1 A)"], "r": 1}], "hinweis": "Das Netzteil muss mindestens den Strom liefern, den die Spule aufnimmt.", "muster": "I = 24 V durch 48 Ω = 0,5 A, also Netzteil B.", "nur": "Die Begründung vergleichst du mit der Musterantwort:", "hilfe": ["Wie viel Strom fließt durch die Spule? Das Netzteil muss ihn liefern können.", "Tabellenbuch: Ohmsches Gesetz. Der Verbraucher bestimmt den Strom, das Netzteil gibt nur den Höchstwert vor.", "Berechne den Strom der Spule aus Spannung und Widerstand und vergleiche ihn mit 0,3 A und 1 A."]}, "6": {"titel": "Rechnungen prüfen", "felder": [{"t": "wahl", "l": "Zeile 1: I = 12 V · 60 Ω = 720 A", "o": ["r", "f"], "r": 1}, {"t": "wahl", "l": "Zeile 2: I = 0,5 A, R = 24 Ω: U = 12 V", "o": ["r", "f"], "r": 0}, {"t": "wahl", "l": "Zeile 3: U = 230 V, I = 5 A: R = 46 Ω", "o": ["r", "f"], "r": 0}, {"t": "wahl", "l": "Zeile 4: U = 5 V, R = 100 Ω: I = 20 mA", "o": ["r", "f"], "r": 1}], "hinweis": "Prüfe Rechenweg und Einheiten.", "muster": "Zeile 1 falsch (I = 0,2 A); Zeile 4 falsch (I = 50 mA)."}, "7": {"titel": "Zusatzaufgabe: Heizlüfter", "felder": [{"t": "num", "l": "Strom eines Heizlüfters <i>I</i>", "e": "A", "v": 10}, {"t": "wahl", "l": "Dürfen zwei Heizlüfter gleichzeitig laufen?", "o": ["ja", "nein"], "r": 1}], "hinweis": "Zwei Geräte am selben Stromkreis: Die Ströme addieren sich.", "muster": "I = 10 A je Gerät; zusammen 20 A, mehr als 16 A: nein.", "hilfe": ["Schreibe zuerst auf, was gegeben und was gesucht ist. Wie viel Strom nimmt ein Heizlüfter auf?", "Tabellenbuch: Ohmsches Gesetz. Zwei Geräte am gleichen Stromkreis: Der Strom der Zuleitung ist die Summe.", "Strom eines Heizlüfters berechnen, verdoppeln und mit 16 A vergleichen."]}}, "spiel": null};
   var T=D.aufgaben, ORDER=D.reihenfolge;
-  document.querySelector('.sub').textContent='Ergebnisse prüfen · '+D.thema;
   var app=document.getElementById('app');
   function el(t,c,h){var e=document.createElement(t); if(c) e.className=c; if(h!==undefined) e.innerHTML=h; return e}
   var m=/[?&]a=(\d+)/.exec(location.search), a=m&&T[m[1]]?m[1]:null;
 
   // Fortschritt: richtig gelöste Aufgaben (Liste der Nummern) im Browserspeicher; die Spiele lesen denselben Schlüssel.
+  try{localStorage.setItem('ls-last',D.kennung)}catch(e){}
   var N=ORDER.length, NEED=Math.floor((N*4+4)/5), KEY='ls-fort-'+D.kennung, mem=[], onRefresh=[];
   function load(){try{var v=JSON.parse(localStorage.getItem(KEY)||'[]'); if(Array.isArray(v)) return v.map(String)}catch(e){} return mem}
   function doneList(){var s=load(); return ORDER.filter(function(k){return s.indexOf(k)>=0})}
   function markDone(k){var s=load(); if(s.indexOf(k)<0){s.push(k); mem=s; try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}} refresh()}
   var prog=el('div','card prog'), pt=el('div','pt'), ptL=el('span','','Fortschritt'), ptR=el('b'), bar=el('div','bar'), fill=el('i'), cs=el('div','cs');
-  pt.appendChild(ptL); pt.appendChild(ptR); bar.appendChild(fill); bar.appendChild(el('u')); prog.appendChild(pt); prog.appendChild(bar); prog.appendChild(cs); app.appendChild(prog);
+  pt.appendChild(ptL); pt.appendChild(ptR); bar.appendChild(fill); bar.appendChild(el('u')); var u50=el('u'); u50.style.left='50%'; bar.appendChild(u50); prog.appendChild(pt); prog.appendChild(bar); prog.appendChild(cs); app.appendChild(prog);
   function refresh(){
     var n=doneList().length, p=Math.floor(n*100/N), frei=n>=NEED;
     ptL.textContent=n+' von '+N+' richtig'; ptR.textContent=p+' %'; fill.style.width=p+'%'; bar.className='bar'+(frei?' frei':'');
-    if(!D.spiel){cs.style.display='none'; bar.querySelector('u').style.display='none'}
-    var W="Spiel"; cs.className='cs'+(frei?' frei':''); cs.textContent='';
-    if(frei){ cs.appendChild(document.createTextNode(W+' freigeschaltet. ')); if(D.spiel){var g=el('a','','Spiel starten →'); g.href='../'+D.spiel[0]+'/?t='+encodeURIComponent(D.spiel[1]); g.style.color='var(--ok)'; cs.appendChild(g)} }
-    else cs.textContent=W+' ab '+NEED+' richtigen Aufgaben (80 %): noch '+(NEED-n)+'.';
+    cs.textContent='';
+    if(!D.spiel){
+      // Neuer Standard (2026-11-09): kein Spiel, Stufen Bronze (50 %), Silber (80 %), Perfektes Blatt (alle richtig)
+      var BR=Math.ceil(N/2), ST=n>=N?3:n>=NEED?2:n>=BR?1:0, NX=ST===0?BR:ST===1?NEED:N, NM=['','Bronze','Silber','Perfektes Blatt'];
+      cs.className='cs'+(ST>=2?' frei':''); bar.className='bar'+(ST>=2?' frei':'');
+      cs.appendChild(document.createTextNode(ST?(NM[ST]+' erreicht. '):''));
+      cs.appendChild(document.createTextNode(ST<3?('Nächste Stufe ('+NM[ST+1]+') bei '+NX+' richtigen Aufgaben, noch '+(NX-n)+'. '):'Alle Aufgaben richtig. Stark! '));
+    } else {
+      var W='Spiel'; cs.className='cs'+(frei?' frei':'');
+      if(frei){ cs.appendChild(document.createTextNode(W+' freigeschaltet. ')); var g=el('a','','Spiel starten →'); g.href='../'+D.spiel[0]+'/?t='+encodeURIComponent(D.spiel[1]); cs.appendChild(g) }
+      else cs.textContent=W+' ab '+NEED+' richtigen Aufgaben (80 %): noch '+(NEED-n)+'.';
+    }
     onRefresh.forEach(function(f){f()});
   }
   try{localStorage.setItem('ls-plan-'+D.kennung,JSON.stringify(ORDER))}catch(e){}   // Aufgabenliste für das Spiel (Sperre prüft Fortschritt gegen diese Liste)
@@ -155,7 +233,7 @@ input:focus,select:focus{outline:2px solid var(--cyan);outline-offset:1px}
   var mu=el('div','muster'); form.appendChild(mu);
 
   // Hilfe: bis zu drei Stufen (grün, gelb, orange); angezeigt werden nur vorhandene. Eine Stufe öffnet die nächste vorhandene.
-  var HF=[['#3ddc84','Grün','Ein Denkanstoß'],['#f5c542','Gelb','Ein Hinweis zum Weg'],['#ff8a3d','Orange','Der nächste Schritt']], hs=[];
+  var HF=[['var(--g1)','Grün','Ein Denkanstoß'],['var(--g2)','Gelb','Ein Hinweis zum Weg'],['var(--g3)','Orange','Der nächste Schritt']], hs=[];
   (d.hilfe||[]).forEach(function(txt,i){if(txt&&HF[i]) hs.push({i:i,txt:txt})});
   if(hs.length){
     var hc=el('div','card hlp'); hc.appendChild(el('h3','','Hilfe')); app.appendChild(hc);
@@ -164,7 +242,7 @@ input:focus,select:focus{outline:2px solid var(--cyan);outline-offset:1px}
       b.type='button'; if(k) b.disabled=true; dot.style.background=f[0];
       b.appendChild(dot); b.appendChild(el('span','t',f[1]+' · '+f[2])); b.appendChild(st); row.appendChild(b); row.appendChild(body); hc.appendChild(row);
       b.addEventListener('click',function(){
-        row.classList.add('open'); st.textContent='OFFEN'; b.disabled=true;
+        row.classList.add('open'); st.textContent='OFFEN'; b.disabled=true; if(window.LSB&&doneList().indexOf(a)<0) LSB.hilfe(D.kennung,a,h.i+1);
         if(hs[k+1]){var nx=hc.querySelectorAll('.hh')[k+1]; nx.disabled=false; nx.querySelector('.s').textContent='ÖFFNEN'}
       });
     });
@@ -180,14 +258,14 @@ input:focus,select:focus{outline:2px solid var(--cyan);outline-offset:1px}
       var got=n*f._eh[+x.sel.value][1], exp=f.v, tol=f.tol||0.012;
       if(Math.abs(got-exp)<=Math.abs(exp)*tol) return {ok:true};
       var r=got/exp;
-      if(Math.abs(r/1000-1)<0.02||Math.abs(r*1000-1)<0.02) return {ok:false,text:'Fast: Der Zahlenwert passt, aber die Einheit nicht. Prüfe Milli (m) oder Kilo (k).'};
-      var fl=f.falsch||[]; for(var i=0;i<fl.length;i++){ var base=fl[i][0]; if(Math.abs(got-base)<=Math.abs(base)*0.012||Math.abs(n-base)<=Math.abs(base)*0.012) return {ok:false,text:fl[i][1]} }
+      if(Math.abs(r/1000-1)<0.02||Math.abs(r*1000-1)<0.02) return {ok:false,spez:true,text:'Fast: Der Zahlenwert passt, aber die Einheit nicht. Prüfe Milli (m) oder Kilo (k).'};
+      var fl=f.falsch||[]; for(var i=0;i<fl.length;i++){ var base=fl[i][0]; if(Math.abs(got-base)<=Math.abs(base)*0.012||Math.abs(n-base)<=Math.abs(base)*0.012) return {ok:false,spez:true,text:fl[i][1]} }
       return {ok:false,text:'Noch nicht ganz. Rechne die Aufgabe noch einmal Schritt für Schritt.'};
     }
     if(f.t==='ratio'){
       var p=parse(x.inp.value), q=parse(x.inp2.value); if(isNaN(p)||isNaN(q)||q===0) return {ok:false,leer:true,text:'Bitte beide Zahlen eingeben.'};
       if(Math.abs(p/q-f.a/f.b)<=0.012*(f.a/f.b)) return {ok:true};
-      if(Math.abs(p/q-f.b/f.a)<=0.012*(f.b/f.a)) return {ok:false,text:'Fast: Die Reihenfolge ist vertauscht. Welcher Widerstand ist größer?'};
+      if(Math.abs(p/q-f.b/f.a)<=0.012*(f.b/f.a)) return {ok:false,spez:true,text:'Fast: Die Reihenfolge ist vertauscht. Welcher Widerstand ist größer?'};
       return {ok:false,text:'Noch nicht ganz. Vergleiche die beiden Widerstände.'};
     }
     var v=+x.sel.value; if(v<0) return {ok:false,leer:true,text:'Bitte eine Antwort wählen.'};
@@ -195,24 +273,26 @@ input:focus,select:focus{outline:2px solid var(--cyan);outline-offset:1px}
   }
 
   function check(){
-    var ok=0, leer=0, wrong=0;
+    var ok=0, leer=0, wrong=0, spez=false, war=doneList().indexOf(a)>=0;
     fields.forEach(function(x){
       var r=checkField(x);
-      if(r.ok){setOk(x);ok++} else if(r.leer){setNo(x,r.text);leer++} else {setNo(x,r.text);wrong++}
+      if(r.ok){setOk(x);ok++} else if(r.leer){setNo(x,r.text);leer++} else {setNo(x,r.text);wrong++; if(r.spez) spez=true}
     });
     msg.className='msg show'; form.classList.remove('pop'); void form.offsetWidth;
     if(fields.length&&ok===fields.length){
+      if(window.LSB&&!war) LSB.erfolg(D.kennung,a);
       markDone(a);
       msg.className='msg show ok'; msg.innerHTML='<b>Alles richtig.</b> Gut gerechnet!'+next(); form.classList.add('pop'); if(navigator.vibrate){try{navigator.vibrate(40)}catch(e){}}
       bShow.style.display='none';
+      if(window.LSB&&!war) LSB.nachher();
     } else {
-      if(wrong>0) fails++;
+      if(wrong>0){ fails++; if(window.LSB&&!war) LSB.fehler(D.kennung,a,spez) }
       msg.className='msg show warn';
       msg.innerHTML='<b>'+ok+' von '+fields.length+' richtig.</b> '+(leer?'Fülle noch alle Felder aus. ':'')+'Überlege noch einmal.<br><small>'+d.hinweis+'</small>';
       if(fails>=2) bShow.style.display='inline-block';
     }
   }
-  function next(){var i=ORDER.indexOf(a); return i<ORDER.length-1?'<br><small><a style="color:var(--cyan)" href="?a='+ORDER[i+1]+'">Weiter zu Aufgabe '+ORDER[i+1]+'</a></small>':''}
+  function next(){var i=ORDER.indexOf(a); return i<ORDER.length-1?'<br><small><a href="?a='+ORDER[i+1]+'">Weiter zu Aufgabe '+ORDER[i+1]+'</a></small>':''}
   bCheck.addEventListener('click',check);
   bShow.addEventListener('click',function(){mu.className='muster show'; mu.innerHTML='<b>Ergebnis</b>\n'+d.muster+(d.nur?'\n\n<small>'+d.nur+'</small>':'')});
   if(d.nur){ var b2=el('button','btn sec','Teil b) vergleichen'); b2.type='button'; btns.appendChild(b2); b2.addEventListener('click',function(){mu.className='muster show'; mu.innerHTML='<b>Musterantwort</b>\n'+d.muster}) }

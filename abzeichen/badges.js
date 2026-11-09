@@ -20,9 +20,16 @@
     {k: 'leistung', n: 'Arbeit und Leistung', i: '💡', gb: 'elektro'},
     {k: 'motor', n: 'Drehstrommotor', i: '⚙️', gb: 'elektro'},
     {k: 'mt-biegung', n: 'Biegung: Brücke und Kragarm', i: '🏗️', gb: 'konstruktion'},
-    {k: 'mt-dreieck', n: 'Sinus- und Kosinussatz', i: '📐', gb: 'konstruktion'}
+    {k: 'mt-dreieck', n: 'Sinus- und Kosinussatz', i: '📐', gb: 'konstruktion'},
+    {k: 'wst-einteilen', n: 'Werkstoffe einteilen', i: '🧲', gb: 'werkstoffe'},
+    {k: 'wst-kennwerte', n: 'Kennwerte im Tabellenbuch', i: '📖', gb: 'werkstoffe'},
+    {k: 'masse-werkstuecke', n: 'Masse von Werkstücken', i: '⚖️', gb: 'werkstoffe'},
+    {k: 'wst-rohteile', n: 'Rohteile und Werkstoff-Detektiv', i: '🔍', gb: 'werkstoffe'},
+    {k: 'wst-eigenschaften', n: 'Eigenschaften und Wärmeausdehnung', i: '🌡️', gb: 'werkstoffe'},
+    {k: 'wst-stahl', n: 'Stahl benennen', i: '🏷️', gb: 'werkstoffe'},
+    {k: 'wst-kunststoffe', n: 'Kunststoffe wählen', i: '🧪', gb: 'werkstoffe'}
   ];
-  var GEBIETE = {elektro: {n: 'Elektrotechnik', i: '⚡'}, fertigung: {n: 'Fertigung', i: '🏭'}, konstruktion: {n: 'Konstruktion', i: '📐'}};
+  var GEBIETE = {elektro: {n: 'Elektrotechnik', i: '⚡'}, fertigung: {n: 'Fertigung', i: '🏭'}, konstruktion: {n: 'Konstruktion', i: '📐'}, werkstoffe: {n: 'Werkstoffe und Masse', i: '🧱'}};
   var TIER = [null, {n: 'Bronze', c: '#cd7f32'}, {n: 'Silber', c: '#c9d3df'}, {n: 'Gold', c: '#ffd24a'}];
 
   /* Abzeichen: id, n = Name, i = Emblem, c = Farbe, grp = Gruppe im Regal, wert(ctx) = aktueller Zähler (wächst), e = Einheit,

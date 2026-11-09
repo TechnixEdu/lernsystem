@@ -162,6 +162,7 @@ section[hidden]{display:none}
       <details>
         <summary>Auf ein neues Gerät übertragen</summary>
         <p>Der Code enthält keine Namen. Erzeuge ihn hier und lies ihn auf dem neuen Gerät ein.</p>
+        <p class="note" id="sicher"></p>
         <div class="row"><button class="btn" type="button" id="bEx">Code erzeugen</button><button class="btn sec" type="button" id="bKo">Kopieren</button></div>
         <textarea id="ta" aria-label="Sicherungscode" placeholder="Hier steht der Code oder füge einen Code zum Einlesen ein."></textarea>
         <div class="row"><button class="btn" type="button" id="bIm">Code einlesen</button></div>
@@ -232,6 +233,11 @@ section[hidden]{display:none}
   if(neu.length) L.zeige(neu,zeichne);
 
   function mel(t,ok){var m=$('mel'); m.textContent=t; m.style.color=ok?'var(--ok)':'var(--warn)'}
+  setTimeout(function(){ var z=L.sicherung(), t;
+    if(z.persist) t='Dein Stand ist doppelt im Browser gesichert und vor automatischem Aufräumen geschützt.';
+    else if(z.spiegel) t='Dein Stand ist doppelt im Browser gesichert. Für den besten Schutz erzeuge zusätzlich einen Code und hebe ihn auf.';
+    else t='Erzeuge einen Code und hebe ihn auf, falls dein Browser seinen Speicher aufräumt.';
+    $('sicher').textContent=t }, 1500);
   $('bEx').addEventListener('click',function(){ $('ta').value=L.exportCode(); mel('Code erzeugt. Kopiere ihn und lies ihn auf dem anderen Gerät ein.',true) });
   $('bKo').addEventListener('click',function(){
     var ta=$('ta'); if(!ta.value){ta.value=L.exportCode()} ta.select();

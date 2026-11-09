@@ -19,9 +19,17 @@
     {k: 'sicherheit', n: 'Sicherheit', i: '🛡️', gb: 'elektro'},
     {k: 'leistung', n: 'Arbeit und Leistung', i: '💡', gb: 'elektro'},
     {k: 'motor', n: 'Drehstrommotor', i: '⚙️', gb: 'elektro'},
-    {k: 'mt-biegung', n: 'Biegung: Brücke und Kragarm', i: '🏗️', gb: 'konstruktion'}
+    {k: 'mt-biegung', n: 'Biegung: Brücke und Kragarm', i: '🏗️', gb: 'konstruktion'},
+    {k: 'mt-dreieck', n: 'Sinus- und Kosinussatz', i: '📐', gb: 'konstruktion'},
+    {k: 'wst-einteilen', n: 'Werkstoffe einteilen', i: '🧲', gb: 'werkstoffe'},
+    {k: 'wst-kennwerte', n: 'Kennwerte im Tabellenbuch', i: '📖', gb: 'werkstoffe'},
+    {k: 'masse-werkstuecke', n: 'Masse von Werkstücken', i: '⚖️', gb: 'werkstoffe'},
+    {k: 'wst-rohteile', n: 'Rohteile und Werkstoff-Detektiv', i: '🔍', gb: 'werkstoffe'},
+    {k: 'wst-eigenschaften', n: 'Eigenschaften und Wärmeausdehnung', i: '🌡️', gb: 'werkstoffe'},
+    {k: 'wst-stahl', n: 'Stahl benennen', i: '🏷️', gb: 'werkstoffe'},
+    {k: 'wst-kunststoffe', n: 'Kunststoffe wählen', i: '🧪', gb: 'werkstoffe'}
   ];
-  var GEBIETE = {elektro: {n: 'Elektrotechnik', i: '⚡'}, fertigung: {n: 'Fertigung', i: '🏭'}, konstruktion: {n: 'Konstruktion', i: '📐'}};
+  var GEBIETE = {elektro: {n: 'Elektrotechnik', i: '⚡'}, fertigung: {n: 'Fertigung', i: '🏭'}, konstruktion: {n: 'Konstruktion', i: '📐'}, werkstoffe: {n: 'Werkstoffe und Masse', i: '🧱'}};
   var TIER = [null, {n: 'Bronze', c: '#cd7f32'}, {n: 'Silber', c: '#c9d3df'}, {n: 'Gold', c: '#ffd24a'}];
 
   /* Abzeichen: id, n = Name, i = Emblem, c = Farbe, grp = Gruppe im Regal, wert(ctx) = aktueller Zähler (wächst), e = Einheit,
@@ -258,9 +266,106 @@
     return {ok: true, msg: 'Abzeichen, Fortschritt und Lernstand wurden übernommen.'};
   }
 
+  /* ---------- Doppelte Sicherung im Browser (IndexedDB) und dauerhafter Speicher
+     Alles bleibt auf dem Gerät. Jede Änderung an ls-* wird zusätzlich in IndexedDB gespiegelt. Fehlen beim Öffnen Schlüssel im localStorage
+     (Browser hat aufgeräumt), werden sie aus der Spiegelung zurückgeholt (nur fehlende, nie überschreibend) und die Seite lädt einmal neu.
+     Dauerhafter Speicher (navigator.storage.persist) wird erst angefragt, wenn es etwas zu sichern gibt. */
+  var SP = {bereit: false, wartet: false, leer: false, spiegel: false, persist: null, timer: null};
+  var ORIG = null;
+  function idb(fn, fehl) {
+    try {
+      var q = indexedDB.open('ls-sicherung', 1);
+      q.onupgradeneeded = function () { q.result.createObjectStore('kv'); };
+      q.onsuccess = function () { try { fn(q.result); } catch (e) { if (fehl) fehl(); } };
+      q.onerror = function () { if (fehl) fehl(); };
+      q.onblocked = function () { if (fehl) fehl(); };
+    } catch (e) { if (fehl) fehl(); }
+  }
+  function schnappschuss() {
+    var o = {}, i, k;
+    try { for (i = 0; i < localStorage.length; i++) { k = localStorage.key(i); if (k && k.indexOf('ls-') === 0) o[k] = localStorage.getItem(k); } } catch (e) {}
+    return o;
+  }
+  function dauerhaft(o) {
+    if (SP.persist !== null) return;
+    var lohnt = false, k;
+    for (k in o) if (k.indexOf('ls-fort-') === 0 || k === 'ls-bd') lohnt = true;
+    if (!lohnt) return;
+    SP.persist = false;
+    try {
+      navigator.storage.persisted().then(function (p) {
+        if (p) { SP.persist = true; return; }
+        navigator.storage.persist().then(function (g) { SP.persist = !!g; }, function () {});
+      }, function () {});
+    } catch (e) {}
+  }
+  function spiegeln(leerErlaubt) {
+    if (!SP.bereit) { SP.wartet = true; if (leerErlaubt) SP.leer = true; return; }
+    var o = schnappschuss(), n = 0, k;
+    for (k in o) n++;
+    if (!n && !leerErlaubt && !SP.leer) return;
+    SP.leer = false;
+    idb(function (db) {
+      var t = db.transaction('kv', 'readwrite');
+      t.objectStore('kv').put({t: Date.now(), d: o}, 'stand');
+      t.oncomplete = function () { SP.spiegel = true; db.close(); };
+    });
+    dauerhaft(o);
+  }
+  function plane(leerErlaubt) {
+    if (leerErlaubt) SP.leer = true;
+    if (SP.timer) return;
+    SP.timer = setTimeout(function () { SP.timer = null; spiegeln(false); }, 300);
+  }
+  function wiederherstellen() {
+    var fertig = function (n) {
+      SP.bereit = true;
+      if (n) {
+        var neu = true;
+        try { neu = sessionStorage.getItem('ls-wh') !== '1'; sessionStorage.setItem('ls-wh', '1'); } catch (e) {}
+        if (neu) { try { location.reload(); return; } catch (e) {} }
+      }
+      spiegeln(false);
+    };
+    var erledigt = false, einmal = function (n) { if (!erledigt) { erledigt = true; fertig(n); } };
+    setTimeout(function () { einmal(0); }, 3000);
+    idb(function (db) {
+      var r = db.transaction('kv').objectStore('kv').get('stand');
+      r.onsuccess = function () {
+        var s = r.result && r.result.d, n = 0, k;
+        db.close();
+        if (s) for (k in s) {
+          if (k.indexOf('ls-') === 0 && typeof s[k] === 'string' && lies(k) === null) {
+            try { ORIG.setItem.call(localStorage, k, s[k]); n++; } catch (e) {}
+          }
+        }
+        einmal(n);
+      };
+      r.onerror = function () { einmal(0); };
+    }, function () { einmal(0); });
+  }
+  function sicherungStart() {
+    try {
+      ORIG = {setItem: Storage.prototype.setItem, removeItem: Storage.prototype.removeItem};
+      Storage.prototype.setItem = function (k, v) {
+        ORIG.setItem.call(this, k, v);
+        try { if (this === localStorage && String(k).indexOf('ls-') === 0) plane(false); } catch (e) {}
+      };
+      Storage.prototype.removeItem = function (k) {
+        ORIG.removeItem.call(this, k);
+        try { if (this === localStorage && String(k).indexOf('ls-') === 0) plane(true); } catch (e) {}
+      };
+      window.addEventListener('pagehide', function () { spiegeln(false); });
+      document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') spiegeln(false); });
+      wiederherstellen();
+    } catch (e) { SP.bereit = true; }
+  }
+  function sicherung() { return {spiegel: SP.spiegel, persist: SP.persist === true, bereit: SP.bereit}; }
+
   window.LSB = {
     REG: REG, GEBIETE: GEBIETE, DEFS: DEFS, TIER: TIER, TITEL: TITEL, stand: stand, stufe: stufe, profil: profil, gesamtstand: gesamtstand,
     pruefe: pruefe, abzeichen: abzeichen, titel: titel, datum: datum, fehler: fehler, hilfe: hilfe, erfolg: erfolg, zeige: zeige, nachher: nachher,
-    exportCode: exportCode, importCode: importCode, bd: bdLesen, bz: function () { return obj('ls-bz', {}); }
+    exportCode: exportCode, importCode: importCode, sicherung: sicherung, bd: bdLesen, bz: function () { return obj('ls-bz', {}); }
   };
+  sicherungStart();
 })();

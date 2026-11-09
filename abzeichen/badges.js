@@ -18,9 +18,10 @@
     {k: 'gemischt', n: 'Gemischte Schaltung', i: '🧩', gb: 'elektro'},
     {k: 'sicherheit', n: 'Sicherheit', i: '🛡️', gb: 'elektro'},
     {k: 'leistung', n: 'Arbeit und Leistung', i: '💡', gb: 'elektro'},
-    {k: 'motor', n: 'Drehstrommotor', i: '⚙️', gb: 'elektro'}
+    {k: 'motor', n: 'Drehstrommotor', i: '⚙️', gb: 'elektro'},
+    {k: 'mt-biegung', n: 'Biegung: Brücke und Kragarm', i: '🏗️', gb: 'konstruktion'}
   ];
-  var GEBIETE = {elektro: {n: 'Elektrotechnik', i: '⚡'}, fertigung: {n: 'Fertigung', i: '🏭'}};
+  var GEBIETE = {elektro: {n: 'Elektrotechnik', i: '⚡'}, fertigung: {n: 'Fertigung', i: '🏭'}, konstruktion: {n: 'Konstruktion', i: '📐'}};
   var TIER = [null, {n: 'Bronze', c: '#cd7f32'}, {n: 'Silber', c: '#c9d3df'}, {n: 'Gold', c: '#ffd24a'}];
 
   /* Abzeichen: id, n = Name, i = Emblem, c = Farbe, grp = Gruppe im Regal, wert(ctx) = aktueller Zähler (wächst), e = Einheit,

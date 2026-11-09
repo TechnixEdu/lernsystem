@@ -149,6 +149,7 @@ section[hidden]{display:none}
 <main class="win">
   <nav class="toolbar" aria-label="Ansicht"><div class="seg"><a href="#" id="tk">Kontrolle</a><a href="#fortschritt" id="tf">Fortschritt</a><a href="#abzeichen" id="ta2">Abzeichen</a></div></nav>
   <div class="content">
+  <div class="card" id="erinn" hidden><p id="eTx" style="margin:0 0 10px"></p><button class="btn" type="button" id="eSp">Stand speichern</button></div>
   <section id="vf">
     <div class="card" id="stats"></div>
     <h2>Themen</h2>
@@ -160,12 +161,10 @@ section[hidden]{display:none}
     <div id="abz"></div>
     <div class="card" style="margin-top:12px">
       <details>
-        <summary>Auf ein neues Gerät übertragen</summary>
-        <p>Der Code enthält keine Namen. Erzeuge ihn hier und lies ihn auf dem neuen Gerät ein.</p>
+        <summary>Stand sichern und auf ein neues Gerät übertragen</summary>
+        <p>Speichere deinen Stand als Datei und lade sie später wieder, zum Beispiel auf einem neuen Handy oder nach dem Wechsel des Browsers. Die Datei enthält keine Namen. Hebe sie in deinen Downloads oder in der Cloud auf.</p>
+        <div class="row"><button class="btn" type="button" id="bSp">Stand speichern</button><button class="btn sec" type="button" id="bLa">Stand laden</button><input type="file" id="fLa" accept=".txt,text/plain" hidden></div>
         <p class="note" id="sicher"></p>
-        <div class="row"><button class="btn" type="button" id="bEx">Code erzeugen</button><button class="btn sec" type="button" id="bKo">Kopieren</button></div>
-        <textarea id="ta" aria-label="Sicherungscode" placeholder="Hier steht der Code oder füge einen Code zum Einlesen ein."></textarea>
-        <div class="row"><button class="btn" type="button" id="bIm">Code einlesen</button></div>
         <div class="mel" id="mel" aria-live="polite"></div>
       </details>
       <label class="tg"><input type="checkbox" id="ton"> Ton beim Freischalten</label>
@@ -235,17 +234,42 @@ section[hidden]{display:none}
   function mel(t,ok){var m=$('mel'); m.textContent=t; m.style.color=ok?'var(--ok)':'var(--warn)'}
   setTimeout(function(){ var z=L.sicherung(), t;
     if(z.persist) t='Dein Stand ist doppelt im Browser gesichert und vor automatischem Aufräumen geschützt.';
-    else if(z.spiegel) t='Dein Stand ist doppelt im Browser gesichert. Für den besten Schutz erzeuge zusätzlich einen Code und hebe ihn auf.';
-    else t='Erzeuge einen Code und hebe ihn auf, falls dein Browser seinen Speicher aufräumt.';
+    else if(z.spiegel) t='Dein Stand ist doppelt im Browser gesichert. Für den besten Schutz speichere zusätzlich deinen Stand als Datei.';
+    else t='Speichere deinen Stand als Datei, falls dein Browser seinen Speicher aufräumt.';
     $('sicher').textContent=t }, 1500);
-  $('bEx').addEventListener('click',function(){ $('ta').value=L.exportCode(); mel('Code erzeugt. Kopiere ihn und lies ihn auf dem anderen Gerät ein.',true) });
-  $('bKo').addEventListener('click',function(){
-    var ta=$('ta'); if(!ta.value){ta.value=L.exportCode()} ta.select();
-    try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(ta.value).then(function(){mel('Kopiert.',true)},function(){document.execCommand('copy'); mel('Kopiert.',true)}) } else { document.execCommand('copy'); mel('Kopiert.',true) } }catch(e){ mel('Markiere den Text und kopiere ihn von Hand.',false) }
-  });
-  $('bIm').addEventListener('click',function(){
-    var r=L.importCode($('ta').value); mel(r.msg,r.ok);
-    if(r.ok){ var n=L.pruefe(); zeichne(); if(n.length) L.zeige(n,zeichne) }
+  function sichern(){
+    var d=new Date(), p=function(n){return (n<10?'0':'')+n};
+    var name='lernstand-'+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'.txt';
+    try{
+      var u=URL.createObjectURL(new Blob([L.exportCode()],{type:'text/plain'})), a=document.createElement('a');
+      a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){URL.revokeObjectURL(u)},4000);
+      try{localStorage.setItem('ls-datei',String(Date.now()))}catch(e){}
+      mel('Stand gespeichert als '+name+'. Bewahre die Datei gut auf.',true);
+      erinnere()
+    }catch(e){ mel('Das Speichern ging in diesem Browser nicht. Versuche es in einem anderen Browser.',false) }
+  }
+  $('bSp').addEventListener('click',sichern);
+  $('eSp').addEventListener('click',sichern);
+  /* Erinnerung: wer Fortschritt hat und seit 7 Tagen (oder noch nie) keine Datei gespeichert hat */
+  function erinnere(){
+    var e=$('erinn'), hat=false, last=0, tage;
+    try{ hat=L.REG.some(function(r){ return L.stand(r).d>0 }) || Object.keys(L.bd()).length>0 }catch(x){}
+    try{ last=+localStorage.getItem('ls-datei')||0 }catch(x){}
+    tage=last?Math.floor((Date.now()-last)/864e5):null;
+    if(!hat || (last && tage<7)){ e.hidden=true; return }
+    $('eTx').textContent= last ? 'Dein Stand wurde zuletzt vor '+tage+' Tagen als Datei gespeichert. Speichere ihn jetzt, damit nichts verloren geht.' : 'Dein Stand ist noch nicht als Datei gespeichert. Speichere ihn jetzt, damit nichts verloren geht, falls dein Browser aufräumt oder du das Gerät wechselst.';
+    e.hidden=false;
+  }
+  erinnere();
+  $('bLa').addEventListener('click',function(){ $('fLa').click() });
+  $('fLa').addEventListener('change',function(){
+    var f=this.files&&this.files[0], inp=this; if(!f) return;
+    if(f.size>200000){ mel('Die Datei ist zu groß, das ist keine Lernstand-Datei.',false); inp.value=''; return }
+    var r=new FileReader();
+    r.onload=function(){ var x=L.importCode(String(r.result||'')); mel(x.msg,x.ok); if(x.ok){ var n=L.pruefe(); zeichne(); if(n.length) L.zeige(n,zeichne) } inp.value='' };
+    r.onerror=function(){ mel('Die Datei konnte nicht gelesen werden.',false); inp.value='' };
+    r.readAsText(f);
   });
   var tn=$('ton'); try{tn.checked=localStorage.getItem('ls-ton')==='1'}catch(e){}
   tn.addEventListener('change',function(){ try{localStorage.setItem('ls-ton',tn.checked?'1':'0')}catch(e){} });

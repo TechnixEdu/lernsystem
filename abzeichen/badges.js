@@ -242,11 +242,11 @@
   function importCode(code) {
     code = String(code || '').replace(/\s+/g, '');
     var m = /^LS3-([A-Za-z0-9+\/=]+)-([0-9a-f]{8})$/.exec(code), j, o;
-    if (!m) return {ok: false, msg: 'Der Code ist unvollständig, falsch kopiert oder stammt aus einer älteren Fassung.'};
-    try { j = atob(m[1]); } catch (e) { return {ok: false, msg: 'Der Code ist beschädigt.'}; }
-    if (hash(j) !== m[2]) return {ok: false, msg: 'Der Code ist beschädigt (Prüfsumme stimmt nicht).'};
-    try { o = JSON.parse(j); } catch (e) { return {ok: false, msg: 'Der Code ist beschädigt.'}; }
-    if (!o || o.v !== 3) return {ok: false, msg: 'Der Code stammt aus einer anderen Fassung.'};
+    if (!m) return {ok: false, msg: 'Die Datei ist unvollständig, ist keine Lernstand-Datei oder stammt aus einer älteren Fassung.'};
+    try { j = atob(m[1]); } catch (e) { return {ok: false, msg: 'Die Datei ist beschädigt.'}; }
+    if (hash(j) !== m[2]) return {ok: false, msg: 'Die Datei ist beschädigt (Prüfsumme stimmt nicht).'};
+    try { o = JSON.parse(j); } catch (e) { return {ok: false, msg: 'Die Datei ist beschädigt.'}; }
+    if (!o || o.v !== 3) return {ok: false, msg: 'Die Datei stammt aus einer anderen Fassung.'};
     var bd = bdLesen(), bz = obj('ls-bz', {}), id, k, ob = o.bz || {};
     for (id in (o.bd || {})) {
       var x = o.bd[id]; if (!def(id) || !x || typeof x !== 'object') continue;

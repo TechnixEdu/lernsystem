@@ -29,7 +29,9 @@
     {k: 'wst-stahl', n: 'Stahl benennen', i: '🏷️', gb: 'werkstoffe'},
     {k: 'wst-kunststoffe', n: 'Kunststoffe wählen', i: '🧪', gb: 'werkstoffe'}
   ];
-  var GEBIETE = {elektro: {n: 'Elektrotechnik', i: '⚡'}, fertigung: {n: 'Fertigung', i: '🏭'}, konstruktion: {n: 'Konstruktion', i: '📐'}, werkstoffe: {n: 'Werkstoffe und Masse', i: '🧱'}};
+  /* fertig: true = Block mit Klassenarbeit, das Gebiet ist vollständig; nur dann zählt der Gebietsmeister. Neue Blätter in einem offenen Gebiet nehmen niemandem etwas weg. Beim Abnehmen einer Klassenarbeit hier auf true setzen. */
+  var GEBIETE = {elektro: {n: 'Elektrotechnik', i: '⚡', fertig: true}, fertigung: {n: 'Fertigung', i: '🏭'}, konstruktion: {n: 'Konstruktion', i: '📐'}, werkstoffe: {n: 'Werkstoffe und Masse', i: '🧱', fertig: true}};
+  function gebieteFertig() { return Object.keys(GEBIETE).filter(function (g) { return GEBIETE[g].fertig; }); }
   /* Stufen je Blatt wie Werkstoffe: Baustahl, Vergütungsstahl, Hartmetall, Diamant (Lehrkraft 2026-11-10) */
   var TIER = [null, {n: 'Baustahl', c: '#9aa5b1'}, {n: 'Vergütungsstahl', c: '#86aedb'}, {n: 'Hartmetall', c: '#d9b35a'}, {n: 'Diamant', c: '#5ee7ff'}];
   var SELTEN = ['gewöhnlich', 'selten', 'episch', 'legendär'];
@@ -43,7 +45,7 @@
     {id: 'silber', grp: 'stufen', n: 'Vergütungsstahl', i: '⚙️', c: '#86aedb', e: 'Blätter', s: 0, p: 2, txt: 'Mindestens 80 % der Aufgaben eines Blatts richtig gelöst.', wert: function (c) { return c.stufen[2]; }, max: function () { return REG.length; }},
     {id: 'perfekt', grp: 'stufen', n: 'Hartmetall', i: '🛠️', c: '#d9b35a', e: 'Blätter', s: 1, p: 3, txt: 'Alle Aufgaben eines Blatts richtig gelöst, Hilfe erlaubt.', wert: function (c) { return c.stufen[3]; }, max: function () { return REG.length; }},
     {id: 'diamant', grp: 'stufen', n: 'Diamant', i: '💎', c: '#5ee7ff', e: 'Blätter', s: 2, p: 5, txt: 'Alle Aufgaben eines Blatts richtig gelöst, ohne eine einzige Hilfe zu öffnen.', wert: function (c) { return c.stufen[4]; }, max: function () { return REG.length; }},
-    {id: 'gebiet', grp: 'ziele', n: 'Gebietsmeister', i: '🏁', c: '#ffd24a', e: 'Gebiete', s: 3, p: 10, meil: [1, 2, 3, 4], txt: 'Alle Blätter eines Fachgebiets auf Hartmetall oder besser.', wert: function (c) { return c.gebFertig; }, max: function () { return Object.keys(GEBIETE).length; }},
+    {id: 'gebiet', grp: 'ziele', n: 'Gebietsmeister', i: '🏁', c: '#ffd24a', e: 'Gebiete', s: 3, p: 10, meil: [1, 2, 3, 4].slice(0, gebieteFertig().length), txt: 'Alle Blätter eines abgeschlossenen Fachgebiets (mit Klassenarbeit) auf Hartmetall oder besser.', wert: function (c) { return c.gebFertig; }, max: function () { return gebieteFertig().length; }},
     {id: 'allrounder', grp: 'ziele', n: 'Allrounder', i: '🧭', c: '#7cc4a0', e: 'Gebiete', s: 1, meil: [3], txt: 'In drei verschiedenen Fachgebieten mindestens ein Blatt auf Hartmetall oder besser.', wert: function (c) { return c.gebMit; }, max: function () { return Object.keys(GEBIETE).length; }},
     {id: 'aufsteiger', grp: 'ziele', n: 'Aufsteiger', i: '⬆️', c: '#6fd1c1', e: 'Mal', s: 1, meil: [1, 5, 15, 40], txt: 'Ein Blatt an einem anderen Tag noch einmal angegangen und in eine höhere Stufe gebracht.', wert: function (c) { return c.bz.auf || 0; }},
     {id: 'anlauf', grp: 'ziele', n: 'Zweiter Anlauf', i: '🎯', c: '#e8955a', e: 'Mal', s: 1, meil: [1, 3, 10, 25], txt: 'Eine Aufgabe gelöst, obwohl es erst nach mindestens drei Fehlversuchen klappte. Dranbleiben zahlt sich aus.', wert: function (c) { return c.bz.zw || 0; }},
@@ -54,7 +56,7 @@
     {id: 'serie', grp: 'ueberraschung', v: true, n: 'Treffsicher', i: '🎓', c: '#a58bf0', e: 'Mal', s: 2, meil: [1], txt: 'Fünf Aufgaben nacheinander richtig gelöst, ohne einen Fehlversuch dazwischen.', wert: function (c) { return c.bz.s5 || 0; }},
     {id: 'zurueck', grp: 'ueberraschung', v: true, n: 'Wiederkehrer', i: '🔁', c: '#7dd3a8', e: 'Mal', s: 1, meil: [1], txt: 'Nach mindestens vier Wochen Pause wieder eine Aufgabe gelöst. Schön, dass du da bist.', wert: function (c) { return c.bz.wk || 0; }}
   ];
-  var TITEL = [[0, 'Neuling', '🌱'], [10, 'Einsteiger', '🌿'], [30, 'Fortgeschritten', '🌳'], [70, 'Profi', '⭐'], [120, 'Meister', '👑']];
+  var TITEL = [[0, 'Neuling', '🌱'], [15, 'Einsteiger', '🌿'], [50, 'Fortgeschritten', '🌳'], [110, 'Profi', '⭐'], [180, 'Meister', '👑']];
   function wochenZahl(bz) { var n = 0, k, w = bz.wz || {}; for (k in w) if (w[k] >= 5) n++; return n; }
 
   function lies(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
@@ -102,7 +104,7 @@
       for (t = 1; t <= s; t++) c.stufen[t]++;
       gb[r.gb] = gb[r.gb] || {n: 0, ok: 0}; gb[r.gb].n++; if (s >= 3) gb[r.gb].ok++;
     });
-    for (g in gb) { if (gb[g].ok >= 1) c.gebMit++; if (gb[g].ok === gb[g].n) c.gebFertig++; }
+    for (g in gb) { if (gb[g].ok >= 1) c.gebMit++; if (gb[g].ok === gb[g].n && GEBIETE[g] && GEBIETE[g].fertig) c.gebFertig++; }
     return c;
   }
   function gesamtstand() {

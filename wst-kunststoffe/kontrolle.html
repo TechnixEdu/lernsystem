@@ -141,6 +141,8 @@ details summary{font:500 1.0625rem/1.3 var(--sans);list-style-position:inside}
 .rang .rl{color:var(--sec);font-size:.8125rem}
 .rang .rn{font:700 1.375rem/1.2 var(--disp);letter-spacing:-.01em}
 .bar u{left:80%}
+.li.offen{opacity:.55}.li.offen .dt{white-space:normal}
+.li .zz small.u{display:block;margin:0;font-size:.75rem;color:var(--ter)}
 
 </style>
 </head>
@@ -176,11 +178,11 @@ details summary{font:500 1.0625rem/1.3 var(--sans);list-style-position:inside}
     var n=doneList().length, p=Math.floor(n*100/N), frei=n>=NEED;
     ptL.textContent=n+' von '+N+' richtig'; ptR.textContent=p+' %'; fill.style.width=p+'%'; bar.className='bar'+(frei?' frei':'');
     cs.textContent='';
-    // Stufen Bronze (50 %), Silber (80 %), Perfektes Blatt (alle richtig)
-      var BR=Math.ceil(N/2), ST=n>=N?3:n>=NEED?2:n>=BR?1:0, NX=ST===0?BR:ST===1?NEED:N, NM=['','Bronze','Silber','Perfektes Blatt'];
+    // Stufen Baustahl (50 %), Vergütungsstahl (80 %), Hartmetall (alle richtig), Diamant (alle richtig ohne Hilfe)
+      var BR=Math.ceil(N/2), ST=n>=N?3:n>=NEED?2:n>=BR?1:0, NX=ST===0?BR:ST===1?NEED:N, NM=['','Baustahl','Vergütungsstahl','Hartmetall'], DI=false; try{ DI=ST===3&&window.LSB&&LSB.stufe4({k:D.kennung})===4 }catch(e){}
       cs.className='cs'+(ST>=2?' frei':''); bar.className='bar'+(ST>=2?' frei':'');
-      cs.appendChild(document.createTextNode(ST?(NM[ST]+' erreicht. '):''));
-      cs.appendChild(document.createTextNode(ST<3?('Nächste Stufe ('+NM[ST+1]+') bei '+NX+' richtigen Aufgaben, noch '+(NX-n)+'. '):'Alle Aufgaben richtig. Stark! '));
+      cs.appendChild(document.createTextNode(DI?'Diamant erreicht. ':(ST?(NM[ST]+' erreicht. '):'')));
+      cs.appendChild(document.createTextNode(ST<3?('Nächste Stufe ('+NM[ST+1]+') bei '+NX+' richtigen Aufgaben, noch '+(NX-n)+'. '):(DI?'Alles richtig und ohne Hilfe. Stark! ':'Alle Aufgaben richtig. Stark! ')));
     onRefresh.forEach(function(f){f()});
   }
   try{localStorage.setItem('ls-plan-'+D.kennung,JSON.stringify(ORDER))}catch(e){}   // Aufgabenliste für das Regal (Umfang je Thema)

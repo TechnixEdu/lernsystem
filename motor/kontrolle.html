@@ -141,6 +141,8 @@ details summary{font:500 1.0625rem/1.3 var(--sans);list-style-position:inside}
 .rang .rl{color:var(--sec);font-size:.8125rem}
 .rang .rn{font:700 1.375rem/1.2 var(--disp);letter-spacing:-.01em}
 .bar u{left:80%}
+.li.offen{opacity:.55}.li.offen .dt{white-space:normal}
+.li .zz small.u{display:block;margin:0;font-size:.75rem;color:var(--ter)}
 
 </style>
 </head>
@@ -164,7 +166,7 @@ details summary{font:500 1.0625rem/1.3 var(--sans);list-style-position:inside}
   function el(t,c,h){var e=document.createElement(t); if(c) e.className=c; if(h!==undefined) e.innerHTML=h; return e}
   var m=/[?&]a=(\d+)/.exec(location.search), a=m&&T[m[1]]?m[1]:null;
 
-  // Fortschritt: richtig gelöste Aufgaben (Liste der Nummern) im Browserspeicher; die Spiele lesen denselben Schlüssel.
+  // Fortschritt: richtig gelöste Aufgaben (Liste der Nummern) im Browserspeicher; das Abzeichen-Regal liest denselben Schlüssel.
   try{localStorage.setItem('ls-last',D.kennung)}catch(e){}
   var N=ORDER.length, NEED=Math.floor((N*4+4)/5), KEY='ls-fort-'+D.kennung, mem=[], onRefresh=[];
   function load(){try{var v=JSON.parse(localStorage.getItem(KEY)||'[]'); if(Array.isArray(v)) return v.map(String)}catch(e){} return mem}
@@ -176,20 +178,14 @@ details summary{font:500 1.0625rem/1.3 var(--sans);list-style-position:inside}
     var n=doneList().length, p=Math.floor(n*100/N), frei=n>=NEED;
     ptL.textContent=n+' von '+N+' richtig'; ptR.textContent=p+' %'; fill.style.width=p+'%'; bar.className='bar'+(frei?' frei':'');
     cs.textContent='';
-    if(!D.spiel){
-      // Neuer Standard (2026-11-09): kein Spiel, Stufen Bronze (50 %), Silber (80 %), Perfektes Blatt (alle richtig)
-      var BR=Math.ceil(N/2), ST=n>=N?3:n>=NEED?2:n>=BR?1:0, NX=ST===0?BR:ST===1?NEED:N, NM=['','Bronze','Silber','Perfektes Blatt'];
+    // Stufen Baustahl (50 %), Vergütungsstahl (80 %), Hartmetall (alle richtig), Diamant (alle richtig ohne Hilfe)
+      var BR=Math.ceil(N/2), ST=n>=N?3:n>=NEED?2:n>=BR?1:0, NX=ST===0?BR:ST===1?NEED:N, NM=['','Baustahl','Vergütungsstahl','Hartmetall'], DI=false; try{ DI=ST===3&&window.LSB&&LSB.stufe4({k:D.kennung})===4 }catch(e){}
       cs.className='cs'+(ST>=2?' frei':''); bar.className='bar'+(ST>=2?' frei':'');
-      cs.appendChild(document.createTextNode(ST?(NM[ST]+' erreicht. '):''));
-      cs.appendChild(document.createTextNode(ST<3?('Nächste Stufe ('+NM[ST+1]+') bei '+NX+' richtigen Aufgaben, noch '+(NX-n)+'. '):'Alle Aufgaben richtig. Stark! '));
-    } else {
-      var W='Spiel'; cs.className='cs'+(frei?' frei':'');
-      if(frei){ cs.appendChild(document.createTextNode(W+' freigeschaltet. ')); var g=el('a','','Spiel starten →'); g.href='../'+D.spiel[0]+'/?t='+encodeURIComponent(D.spiel[1]); cs.appendChild(g) }
-      else cs.textContent=W+' ab '+NEED+' richtigen Aufgaben (80 %): noch '+(NEED-n)+'.';
-    }
+      cs.appendChild(document.createTextNode(DI?'Diamant erreicht. ':(ST?(NM[ST]+' erreicht. '):'')));
+      cs.appendChild(document.createTextNode(ST<3?('Nächste Stufe ('+NM[ST+1]+') bei '+NX+' richtigen Aufgaben, noch '+(NX-n)+'. '):(DI?'Alles richtig und ohne Hilfe. Stark! ':'Alle Aufgaben richtig. Stark! ')));
     onRefresh.forEach(function(f){f()});
   }
-  try{localStorage.setItem('ls-plan-'+D.kennung,JSON.stringify(ORDER))}catch(e){}   // Aufgabenliste für das Spiel (Sperre prüft Fortschritt gegen diese Liste)
+  try{localStorage.setItem('ls-plan-'+D.kennung,JSON.stringify(ORDER))}catch(e){}   // Aufgabenliste für das Regal (Umfang je Thema)
   window.addEventListener('storage',function(e){if(e.key===KEY) refresh()});
   document.getElementById('reset').addEventListener('click',function(e){e.preventDefault(); if(confirm('Fortschritt auf diesem Gerät wirklich löschen?')){mem=[]; try{localStorage.removeItem(KEY)}catch(x){} refresh()}});
 
@@ -295,7 +291,7 @@ details summary{font:500 1.0625rem/1.3 var(--sans);list-style-position:inside}
   function next(){var i=ORDER.indexOf(a); return i<ORDER.length-1?'<br><small><a href="?a='+ORDER[i+1]+'">Weiter zu Aufgabe '+ORDER[i+1]+'</a></small>':''}
   bCheck.addEventListener('click',check);
   bShow.addEventListener('click',function(){mu.className='muster show'; mu.innerHTML='<b>Ergebnis</b>\n'+d.muster+(d.nur?'\n\n<small>'+d.nur+'</small>':'')});
-  if(d.nur){ var b2=el('button','btn sec','Teil b) vergleichen'); b2.type='button'; btns.appendChild(b2); b2.addEventListener('click',function(){mu.className='muster show'; mu.innerHTML='<b>Musterantwort</b>\n'+d.muster}) }
+  if(d.nur){ var b2=el('button','btn sec',d.knopf||'Teil b) vergleichen'); b2.type='button'; btns.appendChild(b2); b2.addEventListener('click',function(){mu.className='muster show'; mu.innerHTML='<b>Musterantwort</b>\n'+d.muster}) }
 
   var nav=el('div','nav'); var i=ORDER.indexOf(a);
   nav.appendChild(i>0?(function(){var l=el('a','','← Aufgabe '+ORDER[i-1]); l.href='?a='+ORDER[i-1]; return l})():el('span','',''));

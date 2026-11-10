@@ -10,7 +10,7 @@
   var REG = [
     {k: 'spannplanung', n: 'Spannen planen', i: '🗜️', gb: 'fertigung'},
     {k: 'honen', n: 'Honen', i: '🔧', gb: 'fertigung'},
-    {k: 'rauheit', n: 'Rauheit', i: '📏', gb: 'fertigung'},
+    {k: 'rauheit-v1', n: 'Rauheit', i: '📏', gb: 'fertigung'},
     {k: 'rueckfederung', n: 'Rückfederung', i: '🔩', gb: 'fertigung'},
     {k: 'grundstromkreis', n: 'Stromkreis', i: '🔋', gb: 'elektro'},
     {k: 'ohm', n: 'Ohmsches Gesetz', i: '📈', gb: 'elektro'},

@@ -141,6 +141,8 @@ details summary{font:500 1.0625rem/1.3 var(--sans);list-style-position:inside}
 .rang .rl{color:var(--sec);font-size:.8125rem}
 .rang .rn{font:700 1.375rem/1.2 var(--disp);letter-spacing:-.01em}
 .bar u{left:80%}
+.li.offen{opacity:.55}.li.offen .dt{white-space:normal}
+.li .zz small.u{display:block;margin:0;font-size:.75rem;color:var(--ter)}
 
 section[hidden]{display:none}
 </style>
@@ -192,16 +194,16 @@ section[hidden]{display:none}
     var tz=0; L.REG.forEach(function(q){ if(L.stand(q).n>0) tz++ });
     kachel(String(g.gel),'Aufgaben');
     kachel(String(tz),tz===1?'Thema':'Themen');
-    kachel(String((L.bz().wo||[]).length),'Wochen');
+    kachel(String(L.wochen()),'Wochen');
     sx.appendChild(z);
 
     var th=$('themen'); th.innerHTML=''; var zahl=0;
     L.REG.forEach(function(rg){
       var sd=L.stand(rg); if(!sd.n) return; zahl++;
-      var s=L.stufe(rg), p=L.profil(rg), c=el('div','card fach'+(s?' g'+s:''));
+      var s=L.stufe4(rg), p=L.profil(rg), c=el('div','card fach'+(s?' g'+s:''));
       var k=el('div','fk'); k.appendChild(el('div','ic',rg.i));
       var na=el('a','na',rg.n); na.href='../'+rg.k+'/kontrolle.html'; k.appendChild(na);
-      var pips=el('div','pips'); for(var q=1;q<=3;q++){var d=el('b'); if(s>=q){d.style.background=L.TIER[q].c; d.style.borderColor=L.TIER[q].c; d.style.boxShadow='0 0 6px '+L.TIER[q].c} pips.appendChild(d)}
+      var pips=el('div','pips'); for(var q=1;q<=4;q++){var d=el('b'); if(s>=q){d.style.background=L.TIER[q].c; d.style.borderColor=L.TIER[q].c; d.style.boxShadow='0 0 6px '+L.TIER[q].c} pips.appendChild(d)}
       k.appendChild(pips); c.appendChild(k);
       c.appendChild(balken('Umfang',p.d,p.n,'',p.d+' / '+p.n));
       if(p.stolper.length){
@@ -213,17 +215,21 @@ section[hidden]{display:none}
     });
     if(!zahl) th.appendChild(el('p','note','Dein erstes Thema erscheint, sobald du die Kontrollseite deines Blatts öffnest (QR-Code auf dem Blatt).'));
 
-    // Abzeichen: nur erreichte, als ruhige Liste (Emoji, Name, Datum, Zähler)
-    var host=$('abz'); host.innerHTML=''; var erreicht=L.abzeichen().filter(function(a){return a.zaehler>0});
+    // Abzeichen: alle sichtbaren (erreicht mit Datum und Zähler, offene mit Ziel), verborgene erst nach dem Erreichen
+    var host=$('abz'); host.innerHTML=''; var alle=L.abzeichen();
+    var sichtbar=alle.filter(function(a){return !a.verborgen||a.zaehler>0}), verb=alle.filter(function(a){return a.verborgen&&a.zaehler===0}).length;
     host.appendChild(el('h2','','Deine Abzeichen'));
-    if(!erreicht.length){ host.appendChild(el('p','note','Hier erscheinen deine Abzeichen, sobald du das erste erreicht hast. Du sammelst nur Gutes.')); return }
     var liste=el('div','card liste');
-    erreicht.forEach(function(a){
-      var z=el('div','li'); z.title=a.txt; z.appendChild(el('div','em',a.i));
-      var t2=el('div','t'); t2.appendChild(el('div','na',a.n)); t2.appendChild(el('div','dt',L.datum(a.datum))); z.appendChild(t2);
-      var zz=el('div','zz',String(a.zaehler)); zz.appendChild(a.e==='Mal'?document.createTextNode('×'):el('small','',a.e)); z.appendChild(zz); liste.appendChild(z);
+    sichtbar.forEach(function(a){
+      var offen=a.stufen>0?a.stufe===0:a.zaehler===0, z=el('div','li'+(offen?' offen':'')); z.title=a.txt; z.appendChild(el('div','em',a.i));
+      var t2=el('div','t'); t2.appendChild(el('div','na',a.n));
+      t2.appendChild(el('div','dt',(offen?a.txt:(a.datum?L.datum(a.datum):''))+' · '+a.selten)); z.appendChild(t2);
+      var zz=el('div','zz',a.ziel&&a.verborgen!==true?(a.zaehler+' / '+a.ziel):String(a.zaehler));
+      if(!a.ziel) zz.appendChild(a.e==='Mal'?document.createTextNode('×'):el('small','',a.e)); else if(a.e!=='Mal') zz.appendChild(el('small','u',a.e));
+      z.appendChild(zz); liste.appendChild(z);
     });
     host.appendChild(liste);
+    if(verb>0) host.appendChild(el('p','note mitte','Noch '+verb+(verb===1?' verborgenes Abzeichen':' verborgene Abzeichen')+'. Sie erscheinen erst, wenn du sie erreichst.'));
   }  var neu=L.pruefe();
   (function(){ var v=location.hash==='#abzeichen'; $('vf').hidden=v; $('va').hidden=!v; $(v?'ta2':'tf').className='an';
     var last=null; try{last=localStorage.getItem('ls-last')}catch(e){} if(last&&/^[a-z0-9-]+$/.test(last)) $('tk').href='../'+last+'/kontrolle.html'; else $('tk').style.display='none';

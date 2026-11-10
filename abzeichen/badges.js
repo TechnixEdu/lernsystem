@@ -1,6 +1,6 @@
 /* Abzeichen-System des Lernsystems (nur eigene Inhalte). Läuft im Browser, speichert nur auf diesem Gerät, keine Namen, kein Server.
    Prinzip wie bei Nike Run Club (Lehrkraft 2026-11-09): jedes Abzeichen = Emblem + Name + Zähler ("n Mal"), der mit jedem Erreichen wächst, dazu Datum.
-   Kein Spiel mehr: Belohnung für Leistung, dazu Anzeige des Lernstands. Es wird nur Positives gesammelt (Lehrkraft 2026-11-09), bewusst wenige Abzeichen. Kein Abzeichen hängt vom ersten Versuch oder vom Verzicht auf Hilfe ab (kein Leistungsdruck, Lehrkraft 2026-11-09).
+   Kein Spiel mehr: Belohnung für Leistung, dazu Anzeige des Lernstands. Es wird nur Positives gesammelt (Lehrkraft 2026-11-09). Neuer Stand 2026-11-10: Stufen Baustahl bis Diamant je Blatt, Diamant nur ohne geöffnete Hilfe (bewusste Ausnahme), Gebiets- und verborgene Abzeichen, Seltenheit, Titel nach Punkten. Kein Abzeichen für Tempo (kein Blitzmerker) und keines hängt vom ersten Versuch ab.
    Speicherschlüssel: ls-fort-<k> / ls-plan-<k> (Fortschritt der Kontrollseite), ls-stat-<k> (Versuche und Hilfen je Blatt),
    ls-bz (Zähler), ls-bd (Abzeichen: {id:{n:Zähler, t:erstes Mal, l:letztes Mal}}), ls-ton ('1' = Ton an).
    Dieselbe Datei liegt in jedem Blattordner und im Regal (Ordner abzeichen). Änderungen überall neu veröffentlichen. */
@@ -30,18 +30,32 @@
     {k: 'wst-kunststoffe', n: 'Kunststoffe wählen', i: '🧪', gb: 'werkstoffe'}
   ];
   var GEBIETE = {elektro: {n: 'Elektrotechnik', i: '⚡'}, fertigung: {n: 'Fertigung', i: '🏭'}, konstruktion: {n: 'Konstruktion', i: '📐'}, werkstoffe: {n: 'Werkstoffe und Masse', i: '🧱'}};
-  var TIER = [null, {n: 'Bronze', c: '#cd7f32'}, {n: 'Silber', c: '#c9d3df'}, {n: 'Gold', c: '#ffd24a'}];
+  /* Stufen je Blatt wie Werkstoffe: Baustahl, Vergütungsstahl, Hartmetall, Diamant (Lehrkraft 2026-11-10) */
+  var TIER = [null, {n: 'Baustahl', c: '#9aa5b1'}, {n: 'Vergütungsstahl', c: '#86aedb'}, {n: 'Hartmetall', c: '#d9b35a'}, {n: 'Diamant', c: '#5ee7ff'}];
+  var SELTEN = ['gewöhnlich', 'selten', 'episch', 'legendär'];
 
   /* Abzeichen: id, n = Name, i = Emblem, c = Farbe, grp = Gruppe im Regal, wert(ctx) = aktueller Zähler (wächst), e = Einheit,
-     still = Zähler wächst ohne Freischalt-Fenster, txt = Beschreibung */
+     meil = Meilensteine (Fenster nur beim Erreichen eines neuen), max(ctx) = Gesamtziel für "n / max", s = Seltenheit (Index in SELTEN),
+     p = Punkte je Zähler für den Titel, v = verborgen (erscheint im Regal erst nach dem Erreichen), txt = Beschreibung.
+     Die Kennungen bronze, silber, perfekt bleiben, damit alte Stände weiterzählen (Baustahl, Vergütungsstahl, Hartmetall). */
   var DEFS = [
-    {id: 'bronze', grp: 'stufen', n: 'Bronze', i: '🥉', c: '#cd7f32', e: 'Mal', txt: 'Die Hälfte der Aufgaben eines Themas richtig gelöst.', wert: function (c) { return c.stufen[1]; }},
-    {id: 'silber', grp: 'stufen', n: 'Silber', i: '🥈', c: '#c9d3df', e: 'Mal', txt: 'Mindestens 80 % der Aufgaben eines Themas richtig gelöst.', wert: function (c) { return c.stufen[2]; }},
-    {id: 'perfekt', grp: 'stufen', n: 'Perfektes Blatt', i: '💎', c: '#5ee7ff', e: 'Mal', txt: 'Alle Aufgaben eines Themas richtig gelöst, egal wie viele Versuche du gebraucht hast.', wert: function (c) { return c.stufen[3]; }},
-    {id: 'woche', grp: 'ausdauer', n: 'Dranbleiber', i: '📅', c: '#7dff6a', e: 'Wochen', txt: 'Wochen, in denen du mindestens eine Aufgabe gelöst hast.', wert: function (c) { return (c.bz.wo || []).length; }},
-    {id: 'aufgaben', grp: 'ausdauer', n: 'Aufgaben', i: '✅', c: '#19e3ff', e: 'gelöst', still: true, txt: 'Richtig gelöste Aufgaben über alle Themen.', wert: function (c) { return c.gel; }}
+    {id: 'bronze', grp: 'stufen', n: 'Baustahl', i: '🔩', c: '#9aa5b1', e: 'Blätter', s: 0, p: 1, txt: 'Die Hälfte der Aufgaben eines Blatts richtig gelöst.', wert: function (c) { return c.stufen[1]; }, max: function () { return REG.length; }},
+    {id: 'silber', grp: 'stufen', n: 'Vergütungsstahl', i: '⚙️', c: '#86aedb', e: 'Blätter', s: 0, p: 2, txt: 'Mindestens 80 % der Aufgaben eines Blatts richtig gelöst.', wert: function (c) { return c.stufen[2]; }, max: function () { return REG.length; }},
+    {id: 'perfekt', grp: 'stufen', n: 'Hartmetall', i: '🛠️', c: '#d9b35a', e: 'Blätter', s: 1, p: 3, txt: 'Alle Aufgaben eines Blatts richtig gelöst, Hilfe erlaubt.', wert: function (c) { return c.stufen[3]; }, max: function () { return REG.length; }},
+    {id: 'diamant', grp: 'stufen', n: 'Diamant', i: '💎', c: '#5ee7ff', e: 'Blätter', s: 2, p: 5, txt: 'Alle Aufgaben eines Blatts richtig gelöst, ohne eine einzige Hilfe zu öffnen.', wert: function (c) { return c.stufen[4]; }, max: function () { return REG.length; }},
+    {id: 'gebiet', grp: 'ziele', n: 'Gebietsmeister', i: '🏁', c: '#ffd24a', e: 'Gebiete', s: 3, p: 10, meil: [1, 2, 3, 4], txt: 'Alle Blätter eines Fachgebiets auf Hartmetall oder besser.', wert: function (c) { return c.gebFertig; }, max: function () { return Object.keys(GEBIETE).length; }},
+    {id: 'allrounder', grp: 'ziele', n: 'Allrounder', i: '🧭', c: '#7cc4a0', e: 'Gebiete', s: 1, meil: [3], txt: 'In drei verschiedenen Fachgebieten mindestens ein Blatt auf Hartmetall oder besser.', wert: function (c) { return c.gebMit; }, max: function () { return Object.keys(GEBIETE).length; }},
+    {id: 'aufsteiger', grp: 'ziele', n: 'Aufsteiger', i: '⬆️', c: '#6fd1c1', e: 'Mal', s: 1, meil: [1, 5, 15, 40], txt: 'Ein Blatt an einem anderen Tag noch einmal angegangen und in eine höhere Stufe gebracht.', wert: function (c) { return c.bz.auf || 0; }},
+    {id: 'anlauf', grp: 'ziele', n: 'Zweiter Anlauf', i: '🎯', c: '#e8955a', e: 'Mal', s: 1, meil: [1, 3, 10, 25], txt: 'Eine Aufgabe gelöst, obwohl es erst nach mindestens drei Fehlversuchen klappte. Dranbleiben zahlt sich aus.', wert: function (c) { return c.bz.zw || 0; }},
+    {id: 'woche', grp: 'ausdauer', n: 'Dranbleiber', i: '🔥', c: '#ff8a3d', e: 'Wochen', s: 1, meil: [3, 6, 12, 25, 50], txt: 'Wochen, in denen du mindestens fünf Aufgaben richtig gelöst hast.', wert: function (c) { return wochenZahl(c.bz); }},
+    {id: 'aufgaben', grp: 'ausdauer', n: 'Aufgaben', i: '✅', c: '#19e3ff', e: 'gelöst', s: 0, meil: [10, 25, 50, 100, 250, 500], txt: 'Richtig gelöste Aufgaben über alle Blätter.', wert: function (c) { return c.gel; }},
+    {id: 'nacht', grp: 'ueberraschung', v: true, n: 'Nachtschicht', i: '🌙', c: '#8e8cf0', e: 'Mal', s: 1, meil: [1], txt: 'Eine Aufgabe nach 20 Uhr gelöst.', wert: function (c) { return c.bz.nacht || 0; }},
+    {id: 'frueh', grp: 'ueberraschung', v: true, n: 'Frühschicht', i: '🌅', c: '#ffb36b', e: 'Mal', s: 1, meil: [1], txt: 'Eine Aufgabe vor 7 Uhr gelöst.', wert: function (c) { return c.bz.frueh || 0; }},
+    {id: 'serie', grp: 'ueberraschung', v: true, n: 'Treffsicher', i: '🎓', c: '#a58bf0', e: 'Mal', s: 2, meil: [1], txt: 'Fünf Aufgaben nacheinander richtig gelöst, ohne einen Fehlversuch dazwischen.', wert: function (c) { return c.bz.s5 || 0; }},
+    {id: 'zurueck', grp: 'ueberraschung', v: true, n: 'Wiederkehrer', i: '🔁', c: '#7dd3a8', e: 'Mal', s: 1, meil: [1], txt: 'Nach mindestens vier Wochen Pause wieder eine Aufgabe gelöst. Schön, dass du da bist.', wert: function (c) { return c.bz.wk || 0; }}
   ];
-  var TITEL = [[0, 'Neuling', '🌱'], [2, 'Einsteiger', '🌿'], [6, 'Fortgeschritten', '🌳'], [15, 'Profi', '⭐'], [30, 'Meister', '👑']];
+  var TITEL = [[0, 'Neuling', '🌱'], [10, 'Einsteiger', '🌿'], [30, 'Fortgeschritten', '🌳'], [70, 'Profi', '⭐'], [120, 'Meister', '👑']];
+  function wochenZahl(bz) { var n = 0, k, w = bz.wz || {}; for (k in w) if (w[k] >= 5) n++; return n; }
 
   function lies(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function schreib(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } }
@@ -61,6 +75,13 @@
     if (!n) return 0;
     return d >= n ? 3 : d >= Math.floor((n * 4 + 4) / 5) ? 2 : d >= Math.ceil(n / 2) ? 1 : 0;
   }
+  /* Stufe 4 (Diamant): alles richtig und jede Aufgabe mit der neuen Kontrollseite erfasst, ohne dass eine Hilfe geöffnet wurde */
+  function stufe4(r) {
+    var s = stufe(r);
+    if (s < 3) return s;
+    var p = profil(r);
+    return (p.erfasst && p.tr === p.n && p.ohneH === p.n) ? 4 : 3;
+  }
   function stat(k) { var s = obj('ls-stat-' + k, {}); s.f = s.f || {}; s.h = s.h || {}; s.d = s.d || {}; s.dd = s.dd || {}; s.ok = s.ok || {}; return s; }
   /* Lernstand eines Themas: Selbstständig und Sicher zählen nur Aufgaben, die mit der neuen Kontrollseite erfasst wurden */
   function profil(r) {
@@ -74,12 +95,14 @@
       ohneH: tr.filter(function (a) { return !(st.h[a] > 0); }).length, erst: tr.filter(function (a) { return !(st.f[a] > 0); }).length, stolper: stolper.slice(0, 3)};
   }
   function kontext() {
-    var c = {bz: obj('ls-bz', {}), gel: 0, stufen: [0, 0, 0, 0]};
+    var c = {bz: obj('ls-bz', {}), gel: 0, stufen: [0, 0, 0, 0, 0], gebFertig: 0, gebMit: 0}, gb = {}, g;
     REG.forEach(function (r) {
-      var s = stufe(r), p = profil(r), t;
+      var s = stufe4(r), p = profil(r), t;
       c.gel += p.d;
       for (t = 1; t <= s; t++) c.stufen[t]++;
+      gb[r.gb] = gb[r.gb] || {n: 0, ok: 0}; gb[r.gb].n++; if (s >= 3) gb[r.gb].ok++;
     });
+    for (g in gb) { if (gb[g].ok >= 1) c.gebMit++; if (gb[g].ok === gb[g].n) c.gebFertig++; }
     return c;
   }
   function gesamtstand() {
@@ -94,16 +117,29 @@
     for (id in bd) if (typeof bd[id] !== 'object' || bd[id] === null || !def(id)) delete bd[id];
     return bd;
   }
-  /* Summe der Zähler (ohne Aufgabenzähler) bestimmt den Rang */
-  function rangSumme(bd) { var n = 0, id; for (id in bd) if (def(id) && !def(id).still && !def(id).rankless) n += bd[id].n; return n; }
+  /* Punkte bestimmen den Rang: je Abzeichen Zähler mal Punkte (Baustahl 1, Vergütungsstahl 2, Hartmetall 3, Diamant 5, Gebiet 10) */
+  function rangSumme(bd) { var n = 0, id; for (id in bd) if (def(id) && def(id).p) n += bd[id].n * def(id).p; return n; }
   function rangStufe(bd) { var n = rangSumme(bd), i = 0, k; for (k = 0; k < TITEL.length; k++) if (n >= TITEL[k][0]) i = k; return i; }
+  /* Aufsteiger: Stufe eines Blatts steigt an einem anderen Tag als beim letzten Stand (beim ersten Mal wird nur gemerkt) */
+  function aufsteiger() {
+    var bz = obj('ls-bz', {}), st = bz.st || {}, tag = Math.floor(Date.now() / 864e5), ch = false;
+    REG.forEach(function (r) {
+      var s = stufe4(r), o = st[r.k];
+      if (!o) { if (s > 0) { st[r.k] = {s: s, d: tag}; ch = true; } }
+      else if (s > o.s) { if (o.d !== tag) bz.auf = (bz.auf || 0) + 1; st[r.k] = {s: s, d: tag}; ch = true; }
+    });
+    if (ch) { bz.st = st; sp('ls-bz', bz); }
+  }
+  function stufeVon(D, x) { return D.meil ? D.meil.filter(function (m) { return x >= m; }).length : x; }
   function pruefe() {
+    aufsteiger();
     var bd = bdLesen(), c = kontext(), neu = [], jetzt = Date.now(), geaendert = false;
     DEFS.forEach(function (D) {
       var v = D.wert(c), alt = bd[D.id] ? bd[D.id].n : 0;
       if (v > alt) {
         bd[D.id] = {n: v, t: bd[D.id] ? bd[D.id].t : jetzt, l: jetzt}; geaendert = true;
-        if (!D.still) neu.push({id: D.id, n: v, neu: alt === 0});
+        var neuS = stufeVon(D, v), altS = stufeVon(D, alt);
+        if (neuS > altS) neu.push({id: D.id, n: D.meil ? D.meil[neuS - 1] : v, neu: altS === 0});
       }
     });
     if (geaendert) sp('ls-bd', bd);
@@ -111,8 +147,13 @@
   }
   /* Liste für das Regal: alle Abzeichen mit Zähler und Datum des letzten Erreichens */
   function abzeichen() {
-    var bd = bdLesen();
-    return DEFS.map(function (D) { var b = bd[D.id]; return {id: D.id, grp: D.grp, n: D.n, i: D.i, c: D.c, e: D.e, txt: D.txt, zaehler: b ? b.n : 0, datum: b ? b.l : null}; });
+    var bd = bdLesen(), c = kontext();
+    return DEFS.map(function (D) {
+      var b = bd[D.id], z = b ? b.n : 0, ziel = null, m;
+      if (D.meil) { for (m = 0; m < D.meil.length; m++) if (D.meil[m] > z) { ziel = D.meil[m]; break; } if (ziel === null) ziel = D.meil[D.meil.length - 1]; }
+      else if (D.max) ziel = D.max(c);
+      return {id: D.id, grp: D.grp, n: D.n, i: D.i, c: D.c, e: D.e, txt: D.txt, zaehler: z, datum: b ? b.l : null, ziel: ziel, verborgen: !!D.v, selten: SELTEN[D.s || 0], stufe: stufeVon(D, z), stufen: D.meil ? D.meil.length : 0};
+    });
   }
 
   /* ---------- Ereignisse der Kontrollseite */
@@ -126,7 +167,14 @@
     var s = stat(k), bz = obj('ls-bz', {});
     if (s.ok[a]) return;
     s.ok[a] = 1;
-    var w = Math.floor(Date.now() / 604800000); bz.wo = bz.wo || []; if (bz.wo.indexOf(w) < 0) bz.wo.push(w);
+    var jetzt = Date.now(), w = Math.floor(jetzt / 604800000), h = new Date().getHours();
+    bz.wo = bz.wo || []; if (bz.wo.indexOf(w) < 0) bz.wo.push(w);
+    bz.wz = bz.wz || {}; bz.wz[w] = (bz.wz[w] || 0) + 1;
+    if (h >= 20 || h < 4) bz.nacht = (bz.nacht || 0) + 1; else if (h < 7) bz.frueh = (bz.frueh || 0) + 1;
+    if (bz.letzt && jetzt - bz.letzt >= 28 * 864e5) bz.wk = (bz.wk || 0) + 1;
+    bz.letzt = jetzt;
+    if ((s.f[a] || 0) >= 3) bz.zw = (bz.zw || 0) + 1;
+    bz.serie = (bz.serie || 0) + 1; if (bz.serie >= 5) { bz.s5 = (bz.s5 || 0) + 1; bz.serie = 0; }
     sp('ls-stat-' + k, s); sp('ls-bz', bz);
   }
 
@@ -204,12 +252,12 @@
       card.appendChild(el('div', 'lsb-k', 'NEUE ABZEICHEN'));
       card.appendChild(el('div', 'lsb-i', '🎉'));
       card.appendChild(el('div', 'lsb-n', ev.length + ' Abzeichen erreicht'));
-      var l = el('div', 'lsb-l'); ev.forEach(function (x) { var y = def(x.id); l.appendChild(el('span', '', y.i + ' ' + y.n + ' · ' + x.n + ' ' + y.e)); }); card.appendChild(l);
+      var l = el('div', 'lsb-l'); ev.forEach(function (x) { var y = def(x.id); l.appendChild(el('span', '', y.i + ' ' + y.n + ' · ' + x.n + ' ' + einheit(y, x.n))); }); card.appendChild(l);
       ev = [];
     } else {
       var x = ev.shift(), y = def(x.id); card.style.setProperty('--lsc', y.c);
       card.appendChild(el('div', 'lsb-k', x.neu ? 'NEUES ABZEICHEN' : 'ABZEICHEN WIEDER ERREICHT'));
-      card.appendChild(el('div', 'lsb-i', y.i)); card.appendChild(el('div', 'lsb-n', y.n)); card.appendChild(el('div', 'lsb-z', x.n + ' ' + y.e)); card.appendChild(el('div', 'lsb-t', y.txt));
+      card.appendChild(el('div', 'lsb-i', y.i)); card.appendChild(el('div', 'lsb-n', y.n)); card.appendChild(el('div', 'lsb-z', x.n + ' ' + einheit(y, x.n))); card.appendChild(el('div', 'lsb-t', y.txt));
     }
     document.body.appendChild(ov); konfetti(); ton();
     var timer = null, zu_ = false;
@@ -220,12 +268,13 @@
     /* Ohne Antippen verschwindet das Fenster von selbst (Lehrkraft 2026-11-09): sanft ausblenden, dann weiter */
     timer = setTimeout(function () { ov.style.transition = 'opacity .3s'; ov.style.opacity = '0'; timer = setTimeout(zu, 320); }, card.querySelector('.lsb-l') ? 6000 : 4500);
   }
+  function einheit(y, n) { return n === 1 ? ({'Blätter': 'Blatt', 'Wochen': 'Woche', 'Gebiete': 'Gebiet'}[y.e] || y.e) : y.e; }
   function nachher(fertig) { var n = pruefe(); zeige(n, fertig); return n; }
 
   /* ---------- Sicherungscode (Übertragen auf ein anderes Gerät) */
   function hash(s) { var h = 2166136261, i; for (i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return ('0000000' + h.toString(16)).slice(-8); }
   function exportCode() {
-    var o = {v: 3, bd: bdLesen(), bz: obj('ls-bz', {}), f: {}, p: {}, s: {}};
+    var o = {v: 4, bd: bdLesen(), bz: obj('ls-bz', {}), f: {}, p: {}, s: {}};
     REG.forEach(function (r) {
       o.f[r.k] = obj('ls-fort-' + r.k, []); o.p[r.k] = obj('ls-plan-' + r.k, []);
       var st = obj('ls-stat-' + r.k, null); if (st) o.s[r.k] = st;
@@ -246,7 +295,7 @@
     try { j = atob(m[1]); } catch (e) { return {ok: false, msg: 'Die Datei ist beschädigt.'}; }
     if (hash(j) !== m[2]) return {ok: false, msg: 'Die Datei ist beschädigt (Prüfsumme stimmt nicht).'};
     try { o = JSON.parse(j); } catch (e) { return {ok: false, msg: 'Die Datei ist beschädigt.'}; }
-    if (!o || o.v !== 3) return {ok: false, msg: 'Die Datei stammt aus einer anderen Fassung.'};
+    if (!o || o.v !== 4) return {ok: false, msg: 'Die Datei stammt aus einer anderen Fassung.'};
     var bd = bdLesen(), bz = obj('ls-bz', {}), id, k, ob = o.bz || {};
     for (id in (o.bd || {})) {
       var x = o.bd[id]; if (!def(id) || !x || typeof x !== 'object') continue;
@@ -255,6 +304,13 @@
     
     var wo = (bz.wo || []).concat(Array.isArray(ob.wo) ? ob.wo : []).filter(function (q) { return typeof q === 'number'; });
     bz.wo = wo.filter(function (q, i) { return wo.indexOf(q) === i; });
+    ['auf', 'zw', 'nacht', 'frueh', 's5', 'wk', 'letzt'].forEach(function (f) { var a = +bz[f] || 0, b = +ob[f] || 0; if (Math.max(a, b)) bz[f] = Math.max(a, b); });
+    var wz = bz.wz || {}, owz = ob.wz && typeof ob.wz === 'object' ? ob.wz : {}, kw;
+    for (kw in owz) if (/^\d+$/.test(kw) && typeof owz[kw] === 'number') wz[kw] = Math.max(wz[kw] || 0, owz[kw]);
+    bz.wz = wz;
+    var st2 = bz.st || {}, ost = ob.st && typeof ob.st === 'object' ? ob.st : {};
+    for (kw in ost) if (ost[kw] && typeof ost[kw].s === 'number' && (!st2[kw] || ost[kw].s > st2[kw].s)) st2[kw] = {s: ost[kw].s, d: +ost[kw].d || 0};
+    bz.st = st2;
     sp('ls-bd', bd); sp('ls-bz', bz);
     REG.forEach(function (r) {
       k = r.k;
@@ -334,6 +390,7 @@
       r.onsuccess = function () {
         var s = r.result && r.result.d, n = 0, k;
         db.close();
+        if (s && s['ls-ver'] !== STAND_VER) { s = null; try { indexedDB.deleteDatabase('ls-sicherung'); } catch (e) {} }
         if (s) for (k in s) {
           if (k.indexOf('ls-') === 0 && typeof s[k] === 'string' && lies(k) === null) {
             try { ORIG.setItem.call(localStorage, k, s[k]); n++; } catch (e) {}
@@ -344,8 +401,25 @@
       r.onerror = function () { einmal(0); };
     }, function () { einmal(0); });
   }
+  /* Neustart mit dem neuen Abzeichen-System (Lehrkraft 2026-11-10): Stände aus der Zeit davor (Daten ohne ls-ver) werden einmalig gelöscht,
+     auch die alte Sicherungskopie in IndexedDB. Danach steht ls-ver = STAND_VER. Ein leerer Speicher (neues Gerät, vom Browser aufgeräumt)
+     bleibt unberührt, damit die Wiederherstellung aus einer Sicherungskopie des neuen Stands noch geht. */
+  var STAND_VER = '2';
+  function neustart() {
+    try {
+      if (lies('ls-ver') === STAND_VER) return;
+      var weg = [], i, k;
+      for (i = 0; i < localStorage.length; i++) { k = localStorage.key(i); if (k && k.indexOf('ls-') === 0 && k !== 'ls-ton') weg.push(k); }
+      if (weg.length) {
+        weg.forEach(function (x) { try { localStorage.removeItem(x); } catch (e) {} });
+        try { indexedDB.deleteDatabase('ls-sicherung'); } catch (e) {}
+      }
+      localStorage.setItem('ls-ver', STAND_VER);
+    } catch (e) { /* ohne Speicher nichts zu tun */ }
+  }
   function sicherungStart() {
     try {
+      neustart();
       ORIG = {setItem: Storage.prototype.setItem, removeItem: Storage.prototype.removeItem};
       Storage.prototype.setItem = function (k, v) {
         ORIG.setItem.call(this, k, v);
@@ -363,7 +437,7 @@
   function sicherung() { return {spiegel: SP.spiegel, persist: SP.persist === true, bereit: SP.bereit}; }
 
   window.LSB = {
-    REG: REG, GEBIETE: GEBIETE, DEFS: DEFS, TIER: TIER, TITEL: TITEL, stand: stand, stufe: stufe, profil: profil, gesamtstand: gesamtstand,
+    REG: REG, GEBIETE: GEBIETE, DEFS: DEFS, TIER: TIER, TITEL: TITEL, stand: stand, stufe: stufe, stufe4: stufe4, SELTEN: SELTEN, wochen: function () { return wochenZahl(obj('ls-bz', {})); }, profil: profil, gesamtstand: gesamtstand,
     pruefe: pruefe, abzeichen: abzeichen, titel: titel, datum: datum, fehler: fehler, hilfe: hilfe, erfolg: erfolg, zeige: zeige, nachher: nachher,
     exportCode: exportCode, importCode: importCode, sicherung: sicherung, bd: bdLesen, bz: function () { return obj('ls-bz', {}); }
   };

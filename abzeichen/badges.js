@@ -12,6 +12,8 @@
     {k: 'honen', n: 'Honen', i: '🔧', gb: 'fertigung'},
     {k: 'rauheit-v1', n: 'Rauheit', i: '📏', gb: 'fertigung'},
     {k: 'rueckfederung', n: 'Rückfederung', i: '🔩', gb: 'fertigung'},
+    {k: 'blechwerkstoffe-v1', n: 'Blechwerkstoffe', i: '📊', gb: 'fertigung'},
+    {k: 'tiefziehen-v1', n: 'Tiefziehen', i: '🥣', gb: 'fertigung'},
     {k: 'grundstromkreis', n: 'Stromkreis', i: '🔋', gb: 'elektro'},
     {k: 'ohm', n: 'Ohmsches Gesetz', i: '📈', gb: 'elektro'},
     {k: 'reihenschaltung', n: 'Reihenschaltung', i: '🔌', gb: 'elektro'},

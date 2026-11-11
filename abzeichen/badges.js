@@ -23,12 +23,12 @@
     {k: 'mt-biegung', n: 'Biegung: Brücke und Kragarm', i: '🏗️', gb: 'konstruktion'},
     {k: 'mt-dreieck', n: 'Sinus- und Kosinussatz', i: '📐', gb: 'konstruktion'},
     {k: 'wst-einteilen', n: 'Werkstoffe einteilen', i: '🧲', gb: 'werkstoffe'},
-    {k: 'wst-kennwerte', n: 'Kennwerte im Tabellenbuch', i: '📖', gb: 'werkstoffe'},
+    {k: 'wst-kennwerte-v2', n: 'Kennwerte im Tabellenbuch', i: '📖', gb: 'werkstoffe'},
     {k: 'masse-werkstuecke', n: 'Masse von Werkstücken', i: '⚖️', gb: 'werkstoffe'},
-    {k: 'wst-rohteile', n: 'Rohteile und Werkstoff-Detektiv', i: '🔍', gb: 'werkstoffe'},
-    {k: 'wst-eigenschaften', n: 'Eigenschaften und Wärmeausdehnung', i: '🌡️', gb: 'werkstoffe'},
+    {k: 'wst-rohteile-v2', n: 'Rohteile und Werkstoff-Detektiv', i: '🔍', gb: 'werkstoffe'},
+    {k: 'wst-eigenschaften-v2', n: 'Eigenschaften und Wärmeausdehnung', i: '🌡️', gb: 'werkstoffe'},
     {k: 'wst-stahl', n: 'Stahl benennen', i: '🏷️', gb: 'werkstoffe'},
-    {k: 'wst-kunststoffe', n: 'Kunststoffe wählen', i: '🧪', gb: 'werkstoffe'}
+    {k: 'wst-kunststoffe-v2', n: 'Kunststoffe wählen', i: '🧪', gb: 'werkstoffe'}
   ];
   /* fertig: true = Block mit Klassenarbeit, das Gebiet ist vollständig; nur dann zählt der Gebietsmeister. Neue Blätter in einem offenen Gebiet nehmen niemandem etwas weg. Beim Abnehmen einer Klassenarbeit hier auf true setzen. */
   var GEBIETE = {elektro: {n: 'Elektrotechnik', i: '⚡', fertig: true}, fertigung: {n: 'Fertigung', i: '🏭'}, konstruktion: {n: 'Konstruktion', i: '📐'}, werkstoffe: {n: 'Werkstoffe und Masse', i: '🧱', fertig: true}};

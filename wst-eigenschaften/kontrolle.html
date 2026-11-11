@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#1e1e1e" media="(prefers-color-scheme: dark)">
-<title>Ergebnis-Kontrolle: Reihenschaltung</title>
+<meta name="robots" content="noindex"><title>Blatt abgelöst · technixedu</title>
 <style>
 /* Fenster: neutrale Titelleiste, durchscheinende Werkzeugleiste, gruppierte Karten. Gedämpfte Farben: ein ruhiger Blaugrauton als Akzent, Grün, Ocker und Gold nur mit Bedeutung. Hell und dunkel automatisch */
 :root{--lsb-stil:apple;--desk:linear-gradient(135deg,#cfd9ee 0%,#e6dff0 55%,#f3e6df 100%);--win:#f5f5f7;--bar:rgba(246,246,248,.82);--bg:#f5f5f7;--card:#ffffff;--label:#1d1d1f;--sec:#6e6e73;--ter:#8e8e93;--sep:rgba(0,0,0,.12);--tint:#3d6a9e;--tintbg:rgba(61,106,158,.11);--on-tint:#ffffff;--ok:#3f7d5c;--okbg:rgba(63,125,92,.12);--warn:#a46a22;--warnbg:rgba(164,106,34,.12);--fill:rgba(0,0,0,.055);--reward:#c4932f;--g1:#6aae8a;--g2:#d8b658;--g3:#d68f55;--cyan:var(--tint);--sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,Roboto,sans-serif;--disp:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif;--mono:ui-monospace,"SF Mono",SFMono-Regular,Consolas,monospace;--serif:"New York",Georgia,"Times New Roman",serif}
@@ -144,165 +144,23 @@ details summary{font:500 1.0625rem/1.3 var(--sans);list-style-position:inside}
 .li.offen{opacity:.55}.li.offen .dt{white-space:normal}
 .li .zz small.u{display:block;margin:0;font-size:.75rem;color:var(--ter)}
 
+.kopf{margin:4px 2px 16px}
+.kopf h1{font:700 2.125rem/1.12 var(--disp);letter-spacing:-.02em;margin:0 0 4px}
+.card p{margin:0 0 10px;color:var(--label);font-size:1.0625rem;line-height:1.5}.card p:last-child{margin:0}
+.btn.voll{display:block;width:100%;margin-top:12px;text-align:center;text-decoration:none}
+.fuss{margin-top:16px;font-size:.8125rem;color:var(--sec);text-align:center;line-height:1.7}.fuss a{color:var(--sec)}
 </style>
 </head>
 <body>
-<main class="win">
-  <nav class="toolbar" aria-label="Ansicht"><div class="seg"><a href="kontrolle.html" class="an">Kontrolle</a><a href="../abzeichen/#fortschritt">Fortschritt</a><a href="../abzeichen/#abzeichen">Abzeichen</a></div></nav>
-  <div class="content">
-    <div id="app"></div>
-    <p class="note">Rechne zuerst auf dem Blatt, dann trage dein Ergebnis ein. Komma oder Punkt sind beide in Ordnung. Die Seite funktioniert ohne Internet, sobald sie einmal geladen wurde.<br><a href="https://technixedu.de/datenschutz.html">Datenschutz</a> · <a href="#" id="reset">Fortschritt zurücksetzen</a></p>
+<main class="win"><div class="content">
+  <div class="kopf"><h1>Dieses Blatt wurde ersetzt</h1></div>
+  <div class="card">
+    <p>Zu diesem Arbeitsblatt gibt es eine neue Fassung. Die Kontrolle auf dieser Seite gehört zur alten Fassung und passt nicht mehr zu den Aufgaben.</p>
+    <p>Scanne den QR-Code auf dem neuen Blatt oder frage deine Lehrkraft nach dem aktuellen Blatt.</p>
   </div>
-</main>
-<script src="badges.js"></script>
-<script>
-(function(){
-  'use strict';
-  // Feldarten: num (Zahl + Einheit), ratio (a : b), wahl (Auswahl). tol = erlaubte relative Abweichung.
-  var EH={Ohm:[['Ω',1],['kΩ',1000]],V:[['V',1],['mV',0.001]],A:[['A',1],['mA',0.001]],W:[['W',1],['kW',1000]],plain:[['',1]]};
-  var D={"thema": "Eigenschaften und Wärmeausdehnung", "kennung": "wst-eigenschaften", "reihenfolge": ["1", "2", "3", "4", "5", "6", "7", "8"], "aufgaben": {"1": {"titel": "Eigenschaften zuordnen", "felder": [{"t": "wahl", "l": "Kupfer leitet elektrischen Strom sehr gut.", "o": ["physikalisch", "mechanisch", "technologisch", "chemisch"], "r": 0}, {"t": "wahl", "l": "Unlegierter Stahl rostet an feuchter Luft.", "o": ["physikalisch", "mechanisch", "technologisch", "chemisch"], "r": 3}, {"t": "wahl", "l": "Messing lässt sich gut zerspanen und bildet kurze Späne.", "o": ["physikalisch", "mechanisch", "technologisch", "chemisch"], "r": 2}, {"t": "wahl", "l": "Gehärteter Stahl lässt sich kaum ankörnen.", "o": ["physikalisch", "mechanisch", "technologisch", "chemisch"], "r": 1}, {"t": "wahl", "l": "Gusseisen bricht bei einem Schlag, ohne sich vorher zu verformen.", "o": ["physikalisch", "mechanisch", "technologisch", "chemisch"], "r": 1}, {"t": "wahl", "l": "Aluminiumblech lässt sich gut tiefziehen.", "o": ["physikalisch", "mechanisch", "technologisch", "chemisch"], "r": 2}, {"t": "wahl", "l": "Nichtrostender Stahl ist gegen viele Reinigungsmittel beständig.", "o": ["physikalisch", "mechanisch", "technologisch", "chemisch"], "r": 3}, {"t": "wahl", "l": "Wolfram schmilzt erst bei 3 390 °C.", "o": ["physikalisch", "mechanisch", "technologisch", "chemisch"], "r": 0}], "hinweis": "Frage dich: Geht es um Kräfte, Wärme und Strom, die Bearbeitung oder die Umgebung?", "muster": "Physikalisch: Strom (1), Schmelzen (8). Chemisch: Rosten (2), Reinigungsmittel (7). Technologisch: Zerspanen (3), Tiefziehen (6). Mechanisch: Ankörnen (4), Schlag (5).", "hilfe": ["Frage dich bei jeder Aussage: Geht es um Kräfte, um Wärme und Strom, um die Bearbeitung oder um die Umgebung?", "Mechanisch: Verhalten bei Belastung. Technologisch: Eignung für ein Fertigungsverfahren. Chemisch: Verhalten gegenüber Stoffen der Umgebung. Physikalisch: messbare Stoffwerte.", ""]}, "2": {"titel": "Welle abkühlen", "felder": [{"t": "num", "l": "Längenänderung Δl", "einheiten": [["mm", 1]], "v": 0.11899999999999998, "tol": 0.04, "falsch": [[1.1899999999999997, "Das Komma stimmt nicht. Prüfe die Größenordnung von α."], [0.21419999999999997, "Du hast mit 45 K statt mit dem Unterschied 25 K gerechnet."]]}, {"t": "num", "l": "Länge bei 20 °C", "einheiten": [["mm", 1]], "v": 199.901, "tol": 0.0003}], "hinweis": "Die Welle wird beim Abkühlen kürzer. Δϑ ist der Unterschied der Temperaturen.", "muster": "Δl = 0,119 mm; l20 = 199,90 mm", "hilfe": ["Schreibe zuerst auf, was gegeben und gesucht ist. Beim Abkühlen wird die Welle kürzer.", "Tabellenbuch: Längenänderung fester Körper. Den Längenausdehnungskoeffizienten von Aluminium in den Stoffwerten nachschlagen; der Temperaturunterschied ist 25 K.", ""]}, "3": {"titel": "Gutteil oder Ausschuss", "felder": [{"t": "wahl", "l": "Die Welle ist", "o": ["Gutteil", "Ausschuss"], "r": 1}, {"t": "num", "l": "Maß bei 45 °C", "einheiten": [["mm", 1]], "v": 200.119, "tol": 0.0003}], "hinweis": "Vergleiche die Länge bei 20 °C mit dem Mindestmaß. Bei höherer Temperatur ist das Maß größer.", "muster": "Ausschuss (199,90 mm < 199,95 mm). Bei 45 °C müsste sie 200,12 mm messen.", "hilfe": ["Vergleiche das Maß bei 20 °C mit den Grenzen der Toleranz.", "Wenn sich ein Maß beim Abkühlen verkürzt, muss es bei der höheren Temperatur größer sein als bei 20 °C.", ""]}, "4": {"titel": "Stahl im Vergleich", "felder": [{"t": "num", "l": "Länge bei 20 °C (Stahl)", "einheiten": [["mm", 1]], "v": 199.9605, "tol": 0.0003}, {"t": "wahl", "l": "Die Welle aus Stahl ist", "o": ["Gutteil", "Ausschuss"], "r": 0}, {"t": "num", "l": "Faktor Aluminium : Stahl", "e": "plain", "v": 2, "tol": 0.04}], "hinweis": "Rechne wie in Aufgabe 2 mit dem Koeffizienten von Stahl.", "muster": "l20 = 199,96 mm (Gutteil); Aluminium dehnt sich doppelt so stark aus.", "hilfe": ["Rechne wie in Aufgabe 2, aber mit dem Koeffizienten von Stahl.", "Faktor heißt: der größere Wert geteilt durch den kleineren.", ""]}, "5": {"titel": "Regeln fürs Messen", "felder": [{"t": "wahl", "l": "Für welche Temperatur gelten die Maße der Zeichnung?", "o": ["0 °C", "20 °C", "45 °C"], "r": 1}], "hinweis": "Welche Temperatur gilt als Bezug?", "muster": "Maße gelten bei 20 °C. Werkstück abkühlen lassen; Werkstück und Messzeug gleich temperiert.", "nur": "Deine zwei Regeln vergleichst du mit der Musterantwort:", "hilfe": ["Welche Temperatur gilt für Maße in der Zeichnung?", "Wovon hängt die Länge eines Werkstücks außerdem ab, wenn es gemessen wird?", ""]}, "6": {"titel": "Wärme beim Zerspanen", "felder": [{"t": "wahl", "l": "Beim Zerspanen von Titan ist die Schneide besonders heiß, weil", "o": ["Titan die Wärme schlecht ableitet", "Titan Wärme besonders gut ableitet", "Titan weich ist"], "r": 0}], "hinweis": "Wohin fließt die Wärme, wenn das Werkstück sie nicht abführt?", "muster": "Titan leitet Wärme schlecht, sie bleibt an der Schneide. Folge: niedrigere Schnittgeschwindigkeit und gute Kühlung.", "nur": "Deine Folge für die Schnittbedingungen vergleichst du mit der Musterantwort:", "hilfe": ["Wohin soll die Wärme aus der Scherzone abfließen, und was passiert, wenn der Weg versperrt ist?", "Welche Folge hat eine heiße Schneide für ihre Standzeit? Was kann man dagegen einstellen?", ""]}, "7": {"titel": "Mechanische Begriffe", "felder": [{"t": "wahl", "l": "Ein Werkstoff widersteht dem Eindringen eines härteren Körpers.", "o": ["Härte", "Festigkeit", "Zähigkeit", "Elastizität", "Sprödigkeit"], "r": 0}, {"t": "wahl", "l": "Ein Werkstoff hält einer großen Zugkraft stand, bevor er reißt.", "o": ["Härte", "Festigkeit", "Zähigkeit", "Elastizität", "Sprödigkeit"], "r": 1}, {"t": "wahl", "l": "Ein Werkstoff nimmt bei einem Schlag viel Energie auf, ohne zu brechen.", "o": ["Härte", "Festigkeit", "Zähigkeit", "Elastizität", "Sprödigkeit"], "r": 2}, {"t": "wahl", "l": "Ein Werkstoff federt nach dem Entlasten in seine alte Form zurück.", "o": ["Härte", "Festigkeit", "Zähigkeit", "Elastizität", "Sprödigkeit"], "r": 3}, {"t": "wahl", "l": "Ein Werkstoff bricht bei einem Schlag fast ohne vorherige Verformung.", "o": ["Härte", "Festigkeit", "Zähigkeit", "Elastizität", "Sprödigkeit"], "r": 4}], "hinweis": "Zäh und spröde sind Gegensätze beim Schlag.", "muster": "Härte, Festigkeit, Zähigkeit, Elastizität, Sprödigkeit (der Reihe nach).", "hilfe": ["Denke an Beispiele: eine Feder, ein Hammerschlag auf Glas, ein Seil unter Zug.", "Zäh und spröde sind Gegensätze beim Schlag. Fest und hart beschreiben Widerstand gegen Zug und Eindringen.", ""]}, "8": {"titel": "Zusatzaufgabe: Träger", "felder": [{"t": "num", "l": "Längenänderung", "einheiten": [["mm", 1]], "v": 7.139999999999999, "tol": 0.03, "falsch": [[4.283999999999999, "Der Temperaturunterschied von −10 °C auf 40 °C sind 50 K."]]}], "hinweis": "Temperaturunterschied von −10 °C bis 40 °C; Länge in mm.", "muster": "Δl = 7,14 mm; ein Ende als Loslager oder Dehnungsfugen.", "nur": "Deine Folge für die Befestigung vergleichst du mit der Musterantwort:", "hilfe": ["Wie groß ist der Temperaturunterschied zwischen −10 °C und 40 °C?", "Rechne die Länge in mm.", ""]}}};
-  var T=D.aufgaben, ORDER=D.reihenfolge;
-  var app=document.getElementById('app');
-  function el(t,c,h){var e=document.createElement(t); if(c) e.className=c; if(h!==undefined) e.innerHTML=h; return e}
-  var m=/[?&]a=(\d+)/.exec(location.search), a=m&&T[m[1]]?m[1]:null;
-
-  // Fortschritt: richtig gelöste Aufgaben (Liste der Nummern) im Browserspeicher; das Abzeichen-Regal liest denselben Schlüssel.
-  try{localStorage.setItem('ls-last',D.kennung)}catch(e){}
-  var N=ORDER.length, NEED=Math.floor((N*4+4)/5), KEY='ls-fort-'+D.kennung, mem=[], onRefresh=[];
-  function load(){try{var v=JSON.parse(localStorage.getItem(KEY)||'[]'); if(Array.isArray(v)) return v.map(String)}catch(e){} return mem}
-  function doneList(){var s=load(); return ORDER.filter(function(k){return s.indexOf(k)>=0})}
-  function markDone(k){var s=load(); if(s.indexOf(k)<0){s.push(k); mem=s; try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}} refresh()}
-  var prog=el('div','card prog'), pt=el('div','pt'), ptL=el('span','','Fortschritt'), ptR=el('b'), bar=el('div','bar'), fill=el('i'), cs=el('div','cs');
-  pt.appendChild(ptL); pt.appendChild(ptR); bar.appendChild(fill); bar.appendChild(el('u')); var u50=el('u'); u50.style.left='50%'; bar.appendChild(u50); prog.appendChild(pt); prog.appendChild(bar); prog.appendChild(cs); app.appendChild(prog);
-  function refresh(){
-    var n=doneList().length, p=Math.floor(n*100/N), frei=n>=NEED;
-    ptL.textContent=n+' von '+N+' richtig'; ptR.textContent=p+' %'; fill.style.width=p+'%'; bar.className='bar'+(frei?' frei':'');
-    cs.textContent='';
-    // Stufen Baustahl (50 %), Vergütungsstahl (80 %), Hartmetall (alle richtig), Diamant (alle richtig ohne Hilfe)
-      var BR=Math.ceil(N/2), ST=n>=N?3:n>=NEED?2:n>=BR?1:0, NX=ST===0?BR:ST===1?NEED:N, NM=['','Baustahl','Vergütungsstahl','Hartmetall'], DI=false; try{ DI=ST===3&&window.LSB&&LSB.stufe4({k:D.kennung})===4 }catch(e){}
-      cs.className='cs'+(ST>=2?' frei':''); bar.className='bar'+(ST>=2?' frei':'');
-      cs.appendChild(document.createTextNode(DI?'Diamant erreicht. ':(ST?(NM[ST]+' erreicht. '):'')));
-      cs.appendChild(document.createTextNode(ST<3?('Nächste Stufe ('+NM[ST+1]+') bei '+NX+' richtigen Aufgaben, noch '+(NX-n)+'. '):(DI?'Alles richtig und ohne Hilfe. Stark! ':'Alle Aufgaben richtig. Stark! ')));
-    onRefresh.forEach(function(f){f()});
-  }
-  try{localStorage.setItem('ls-plan-'+D.kennung,JSON.stringify(ORDER))}catch(e){}   // Aufgabenliste für das Regal (Umfang je Thema)
-  window.addEventListener('storage',function(e){if(e.key===KEY) refresh()});
-  document.getElementById('reset').addEventListener('click',function(e){e.preventDefault(); if(confirm('Fortschritt auf diesem Gerät wirklich löschen?')){mem=[]; try{localStorage.removeItem(KEY)}catch(x){} refresh()}});
-
-  if(!a){
-    var c=el('div','card'); c.appendChild(el('h2','','Zu welcher Aufgabe?')); c.appendChild(el('p','','Wähle die Aufgabe, deren Ergebnis du prüfen möchtest.')); app.appendChild(c);
-    var g=el('div','pick'), links={}; ORDER.forEach(function(k){var l=el('a','','Aufgabe '+k); l.href='?a='+k; g.appendChild(l); links[k]=l}); app.appendChild(g);
-    onRefresh.push(function(){var s=doneList(); ORDER.forEach(function(k){var ok=s.indexOf(k)>=0; links[k].className=ok?'done':''; links[k].textContent='Aufgabe '+k+(ok?' ✓':'')})});
-    refresh(); return;
-  }
-
-  var d=T[a], card=el('div','card'), intro=el('p','','Trage dein Ergebnis ein und tippe auf „Prüfen“.'), fin=el('div','fin','✓ Diese Aufgabe ist bereits richtig gelöst.');
-  card.appendChild(el('h2','','Aufgabe '+a+': '+d.titel)); card.appendChild(intro); card.appendChild(fin); app.appendChild(card);
-  onRefresh.push(function(){fin.className='fin'+(doneList().indexOf(a)>=0?' show':'')});
-  var form=el('div','card'); app.appendChild(form);
-  var fields=[], fails=0;
-
-  function parse(s){s=(s||'').toString().trim().replace(',','.'); if(s==='') return NaN; return Number(s)}
-  d.felder.forEach(function(f){
-    var row=el('div','row'); row.appendChild(el('div','lab',f.l));
-    var inw=el('div','in'), inp, sel, inp2;
-    if(f.t==='num'){
-      inp=el('input'); inp.type='text'; inp.inputMode='decimal'; inp.autocomplete='off'; inp.setAttribute('aria-label','Zahl');
-      var eh=f.einheiten||EH[f.e||'plain']; f._eh=eh; inw.appendChild(inp);
-      if(eh.length>1||eh[0][0]){sel=el('select'); eh.forEach(function(u,i){var o=el('option','',u[0]); o.value=i; sel.appendChild(o)}); inw.appendChild(sel)} else sel={value:0};
-    } else if(f.t==='ratio'){
-      inp=el('input','sm'); inp.type='text'; inp.inputMode='decimal'; inp2=el('input','sm'); inp2.type='text'; inp2.inputMode='decimal';
-      inw.appendChild(inp); inw.appendChild(el('span','',':')); inw.appendChild(inp2);
-    } else {
-      sel=el('select','wide'); var o0=el('option','','– wählen –'); o0.value='-1'; sel.appendChild(o0);
-      f.o.forEach(function(x,i){var o=el('option','',x); o.value=i; sel.appendChild(o)}); inw.appendChild(sel);
-    }
-    var st=el('div','st','·'), fb=el('div','fb');
-    row.appendChild(inw); row.appendChild(st); row.appendChild(fb); form.appendChild(row);
-    fields.push({f:f,inp:inp,inp2:inp2,sel:sel,st:st,fb:fb});
-    [inp,inp2,sel].forEach(function(x){ if(x&&x.addEventListener) x.addEventListener('input',function(){st.className='st';st.textContent='·';fb.className='fb'}); if(x&&x.tagName&&x.tagName==='SELECT') x.addEventListener('change',function(){st.className='st';st.textContent='·';fb.className='fb'}) });
-  });
-
-  var btns=el('div','btns'), bCheck=el('button','btn','PRÜFEN'), bShow=el('button','btn sec','Ergebnis anzeigen');
-  bCheck.type='button'; bShow.type='button'; bShow.style.display='none'; btns.appendChild(bCheck); btns.appendChild(bShow); form.appendChild(btns);
-  var msg=el('div','msg'); form.appendChild(msg);
-  var mu=el('div','muster'); form.appendChild(mu);
-
-  // Hilfe: bis zu drei Stufen (grün, gelb, orange); angezeigt werden nur vorhandene. Eine Stufe öffnet die nächste vorhandene.
-  var HF=[['var(--g1)','Grün','Ein Denkanstoß'],['var(--g2)','Gelb','Ein Hinweis zum Weg'],['var(--g3)','Orange','Der nächste Schritt']], hs=[];
-  (d.hilfe||[]).forEach(function(txt,i){if(txt&&HF[i]) hs.push({i:i,txt:txt})});
-  if(hs.length){
-    var hc=el('div','card hlp'); hc.appendChild(el('h3','','Hilfe')); app.appendChild(hc);
-    hs.forEach(function(h,k){
-      var f=HF[h.i], row=el('div','hl'), b=el('button','hh'), dot=el('span','dot'), st=el('span','s',k?'GESPERRT':'ÖFFNEN'), body=el('div','hb',h.txt);
-      b.type='button'; if(k) b.disabled=true; dot.style.background=f[0];
-      b.appendChild(dot); b.appendChild(el('span','t',f[1]+' · '+f[2])); b.appendChild(st); row.appendChild(b); row.appendChild(body); hc.appendChild(row);
-      b.addEventListener('click',function(){
-        row.classList.add('open'); st.textContent='OFFEN'; b.disabled=true; if(window.LSB&&doneList().indexOf(a)<0) LSB.hilfe(D.kennung,a,h.i+1);
-        if(hs[k+1]){var nx=hc.querySelectorAll('.hh')[k+1]; nx.disabled=false; nx.querySelector('.s').textContent='ÖFFNEN'}
-      });
-    });
-  }
-
-  function setOk(x){x.st.className='st ok'; x.st.textContent='✓'; x.fb.className='fb'}
-  function setNo(x,text){x.st.className='st no'; x.st.textContent='!'; if(text){x.fb.textContent=text; x.fb.className='fb show'} else x.fb.className='fb'}
-
-  function checkField(x){
-    var f=x.f;
-    if(f.t==='num'){
-      var n=parse(x.inp.value); if(isNaN(n)) return {ok:false,leer:true,text:'Bitte eine Zahl eingeben.'};
-      var got=n*f._eh[+x.sel.value][1], exp=f.v, tol=f.tol||0.012;
-      if(Math.abs(got-exp)<=Math.abs(exp)*tol) return {ok:true};
-      var r=got/exp;
-      if(Math.abs(r/1000-1)<0.02||Math.abs(r*1000-1)<0.02) return {ok:false,spez:true,text:'Fast: Der Zahlenwert passt, aber die Einheit nicht. Prüfe Milli (m) oder Kilo (k).'};
-      var fl=f.falsch||[]; for(var i=0;i<fl.length;i++){ var base=fl[i][0]; if(Math.abs(got-base)<=Math.abs(base)*0.012||Math.abs(n-base)<=Math.abs(base)*0.012) return {ok:false,spez:true,text:fl[i][1]} }
-      return {ok:false,text:'Noch nicht ganz. Rechne die Aufgabe noch einmal Schritt für Schritt.'};
-    }
-    if(f.t==='ratio'){
-      var p=parse(x.inp.value), q=parse(x.inp2.value); if(isNaN(p)||isNaN(q)||q===0) return {ok:false,leer:true,text:'Bitte beide Zahlen eingeben.'};
-      if(Math.abs(p/q-f.a/f.b)<=0.012*(f.a/f.b)) return {ok:true};
-      if(Math.abs(p/q-f.b/f.a)<=0.012*(f.b/f.a)) return {ok:false,spez:true,text:'Fast: Die Reihenfolge ist vertauscht. Welcher Widerstand ist größer?'};
-      return {ok:false,text:'Noch nicht ganz. Vergleiche die beiden Widerstände.'};
-    }
-    var v=+x.sel.value; if(v<0) return {ok:false,leer:true,text:'Bitte eine Antwort wählen.'};
-    return v===f.r?{ok:true}:{ok:false,text:''};
-  }
-
-  function check(){
-    var ok=0, leer=0, wrong=0, spez=false, war=doneList().indexOf(a)>=0;
-    fields.forEach(function(x){
-      var r=checkField(x);
-      if(r.ok){setOk(x);ok++} else if(r.leer){setNo(x,r.text);leer++} else {setNo(x,r.text);wrong++; if(r.spez) spez=true}
-    });
-    msg.className='msg show'; form.classList.remove('pop'); void form.offsetWidth;
-    if(fields.length&&ok===fields.length){
-      if(window.LSB&&!war) LSB.erfolg(D.kennung,a);
-      markDone(a);
-      msg.className='msg show ok'; msg.innerHTML='<b>Alles richtig.</b> Gut gerechnet!'+next(); form.classList.add('pop'); if(navigator.vibrate){try{navigator.vibrate(40)}catch(e){}}
-      bShow.style.display='none';
-      if(window.LSB&&!war) LSB.nachher();
-    } else {
-      if(wrong>0){ fails++; if(window.LSB&&!war) LSB.fehler(D.kennung,a,spez) }
-      msg.className='msg show warn';
-      msg.innerHTML='<b>'+ok+' von '+fields.length+' richtig.</b> '+(leer?'Fülle noch alle Felder aus. ':'')+'Überlege noch einmal.<br><small>'+d.hinweis+'</small>';
-      if(fails>=2) bShow.style.display='inline-block';
-    }
-  }
-  function next(){var i=ORDER.indexOf(a); return i<ORDER.length-1?'<br><small><a href="?a='+ORDER[i+1]+'">Weiter zu Aufgabe '+ORDER[i+1]+'</a></small>':''}
-  bCheck.addEventListener('click',check);
-  bShow.addEventListener('click',function(){mu.className='muster show'; mu.innerHTML='<b>Ergebnis</b>\n'+d.muster+(d.nur?'\n\n<small>'+d.nur+'</small>':'')});
-  if(d.nur){ var b2=el('button','btn sec',d.knopf||'Teil b) vergleichen'); b2.type='button'; btns.appendChild(b2); b2.addEventListener('click',function(){mu.className='muster show'; mu.innerHTML='<b>Musterantwort</b>\n'+d.muster}) }
-
-  var nav=el('div','nav'); var i=ORDER.indexOf(a);
-  nav.appendChild(i>0?(function(){var l=el('a','','← Aufgabe '+ORDER[i-1]); l.href='?a='+ORDER[i-1]; return l})():el('span','',''));
-  var all=el('a','','Alle Aufgaben'); all.href='kontrolle.html'; nav.appendChild(all);
-  nav.appendChild(i<ORDER.length-1?(function(){var l=el('a','','Aufgabe '+ORDER[i+1]+' →'); l.href='?a='+ORDER[i+1]; return l})():el('span','',''));
-  app.appendChild(nav);
-  refresh();
-
-  if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){try{navigator.serviceWorker.register('sw.js')}catch(e){}}
-  window.__kontrolle={fill:function(vals){fields.forEach(function(x,k){var v=vals[k]; if(v===undefined) return; if(x.f.t==='num'){x.inp.value=v[0]; x.sel.value=v[1]||0} else if(x.f.t==='ratio'){x.inp.value=v[0]; x.inp2.value=v[1]} else x.sel.value=v})},check:check};   // nur zum Testen
-})();
-</script>
+  <a class="btn voll" href="/scan/">QR-Code scannen</a>
+  <a class="btn voll" href="/">Zur Startseite</a>
+  <p class="fuss">Kontakt: <a href="mailto:christoph.sahlmann@bkbocholt-west.eu">christoph.sahlmann@bkbocholt-west.eu</a><br><a href="/datenschutz.html">Datenschutz</a></p>
+</div></main>
 </body>
 </html>

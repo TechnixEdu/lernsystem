@@ -1,6 +1,6 @@
 // Service Worker: legt die Seiten beim ersten Aufruf im Cache ab, danach laufen sie ohne Internet.
 // Der Cache-Name enthaelt die Pruefsumme der Seiten, neue Fassungen werden dadurch automatisch geladen.
-const CACHE = 'ls-blechwerkstoffe-v1-bacc0cfb54';
+const CACHE = 'ls-blechwerkstoffe-v1-c2d195c51e';
 const FILES = ['./', 'badges.js', 'kontrolle.html'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

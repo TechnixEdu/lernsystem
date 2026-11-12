@@ -14,6 +14,7 @@
     {k: 'rueckfederung', n: 'Rückfederung', i: '🔩', gb: 'fertigung'},
     {k: 'blechwerkstoffe-v1', n: 'Blechwerkstoffe', i: '📊', gb: 'fertigung'},
     {k: 'tiefziehen-v1', n: 'Tiefziehen', i: '🥣', gb: 'fertigung'},
+    {k: 'welle-nabe-v1', n: 'Welle-Nabe-Verbindungen', i: '⚙️', gb: 'konstruktion'},
     {k: 'grundstromkreis', n: 'Stromkreis', i: '🔋', gb: 'elektro'},
     {k: 'ohm', n: 'Ohmsches Gesetz', i: '📈', gb: 'elektro'},
     {k: 'reihenschaltung', n: 'Reihenschaltung', i: '🔌', gb: 'elektro'},

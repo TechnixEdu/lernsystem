@@ -9,7 +9,6 @@
   /* Themenliste: k = Kennung des Blatts, n = Name, i = Symbol, gb = Fachgebiet */
   var REG = [
     {k: 'spannplanung', n: 'Spannen planen', i: '🗜️', gb: 'fertigung'},
-    {k: 'honen', n: 'Honen', i: '🔧', gb: 'fertigung'},
     {k: 'rauheit-v1', n: 'Rauheit', i: '📏', gb: 'fertigung'},
     {k: 'rauheit-erreichen-v1', n: 'Rauheit erreichen', i: '🎯', gb: 'fertigung'},
     {k: 'rauheit-erreichen-v2', n: 'Rauheit erreichen', i: '🎯', gb: 'fertigung'},

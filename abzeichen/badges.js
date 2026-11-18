@@ -22,6 +22,7 @@
     {k: 'parallelschaltung', n: 'Parallelschaltung', i: '🔀', gb: 'elektro'},
     {k: 'gemischt', n: 'Gemischte Schaltung', i: '🧩', gb: 'elektro'},
     {k: 'sicherheit', n: 'Sicherheit', i: '🛡️', gb: 'elektro'},
+    {k: 'sicherheit-v2', n: 'Sicherheit', i: '🛡️', gb: 'elektro'},
     {k: 'leistung', n: 'Arbeit und Leistung', i: '💡', gb: 'elektro'},
     {k: 'motor', n: 'Drehstrommotor', i: '⚙️', gb: 'elektro'},
     {k: 'mt-biegung', n: 'Biegung: Brücke und Kragarm', i: '🏗️', gb: 'konstruktion'},

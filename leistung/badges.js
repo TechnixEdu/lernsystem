@@ -9,25 +9,31 @@
   /* Themenliste: k = Kennung des Blatts, n = Name, i = Symbol, gb = Fachgebiet */
   var REG = [
     {k: 'spannplanung', n: 'Spannen planen', i: '🗜️', gb: 'fertigung'},
-    {k: 'honen', n: 'Honen', i: '🔧', gb: 'fertigung'},
+    {k: 'rauheit-v1', n: 'Rauheit', i: '📏', gb: 'fertigung'},
+    {k: 'rauheit-erreichen-v1', n: 'Rauheit erreichen', i: '🎯', gb: 'fertigung'},
+    {k: 'rauheit-erreichen-v2', n: 'Rauheit erreichen', i: '🎯', gb: 'fertigung'},
     {k: 'rueckfederung', n: 'Rückfederung', i: '🔩', gb: 'fertigung'},
+    {k: 'blechwerkstoffe-v1', n: 'Blechwerkstoffe', i: '📊', gb: 'fertigung'},
+    {k: 'tiefziehen-v1', n: 'Tiefziehen', i: '🥣', gb: 'fertigung'},
+    {k: 'welle-nabe-v1', n: 'Welle-Nabe-Verbindungen', i: '⚙️', gb: 'konstruktion'},
     {k: 'grundstromkreis', n: 'Stromkreis', i: '🔋', gb: 'elektro'},
     {k: 'ohm', n: 'Ohmsches Gesetz', i: '📈', gb: 'elektro'},
     {k: 'reihenschaltung', n: 'Reihenschaltung', i: '🔌', gb: 'elektro'},
     {k: 'parallelschaltung', n: 'Parallelschaltung', i: '🔀', gb: 'elektro'},
     {k: 'gemischt', n: 'Gemischte Schaltung', i: '🧩', gb: 'elektro'},
     {k: 'sicherheit', n: 'Sicherheit', i: '🛡️', gb: 'elektro'},
+    {k: 'sicherheit-v2', n: 'Sicherheit', i: '🛡️', gb: 'elektro'},
     {k: 'leistung', n: 'Arbeit und Leistung', i: '💡', gb: 'elektro'},
     {k: 'motor', n: 'Drehstrommotor', i: '⚙️', gb: 'elektro'},
     {k: 'mt-biegung', n: 'Biegung: Brücke und Kragarm', i: '🏗️', gb: 'konstruktion'},
     {k: 'mt-dreieck', n: 'Sinus- und Kosinussatz', i: '📐', gb: 'konstruktion'},
     {k: 'wst-einteilen', n: 'Werkstoffe einteilen', i: '🧲', gb: 'werkstoffe'},
-    {k: 'wst-kennwerte', n: 'Kennwerte im Tabellenbuch', i: '📖', gb: 'werkstoffe'},
+    {k: 'wst-kennwerte-v2', n: 'Kennwerte im Tabellenbuch', i: '📖', gb: 'werkstoffe'},
     {k: 'masse-werkstuecke', n: 'Masse von Werkstücken', i: '⚖️', gb: 'werkstoffe'},
-    {k: 'wst-rohteile', n: 'Rohteile und Werkstoff-Detektiv', i: '🔍', gb: 'werkstoffe'},
-    {k: 'wst-eigenschaften', n: 'Eigenschaften und Wärmeausdehnung', i: '🌡️', gb: 'werkstoffe'},
+    {k: 'wst-rohteile-v2', n: 'Rohteile und Werkstoff-Detektiv', i: '🔍', gb: 'werkstoffe'},
+    {k: 'wst-eigenschaften-v2', n: 'Eigenschaften und Wärmeausdehnung', i: '🌡️', gb: 'werkstoffe'},
     {k: 'wst-stahl', n: 'Stahl benennen', i: '🏷️', gb: 'werkstoffe'},
-    {k: 'wst-kunststoffe', n: 'Kunststoffe wählen', i: '🧪', gb: 'werkstoffe'}
+    {k: 'wst-kunststoffe-v2', n: 'Kunststoffe wählen', i: '🧪', gb: 'werkstoffe'}
   ];
   /* fertig: true = Block mit Klassenarbeit, das Gebiet ist vollständig; nur dann zählt der Gebietsmeister. Neue Blätter in einem offenen Gebiet nehmen niemandem etwas weg. Beim Abnehmen einer Klassenarbeit hier auf true setzen. */
   var GEBIETE = {elektro: {n: 'Elektrotechnik', i: '⚡', fertig: true}, fertigung: {n: 'Fertigung', i: '🏭'}, konstruktion: {n: 'Konstruktion', i: '📐'}, werkstoffe: {n: 'Werkstoffe und Masse', i: '🧱', fertig: true}};
